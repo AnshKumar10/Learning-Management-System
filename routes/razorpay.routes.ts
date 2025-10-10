@@ -2,8 +2,8 @@ import express from 'express';
 import {
   createRazorpayOrder,
   verifyPayment,
-} from '@controllers/razorpay.controller.js';
-import { isAuthenticated } from '@middlewares/auth.middleware.js';
+} from '@controllers/razorpay.controller';
+import { isAuthenticated } from '@middlewares/auth.middleware';
 
 const router = express.Router();
 

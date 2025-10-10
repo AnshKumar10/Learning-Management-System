@@ -1,4 +1,4 @@
-import { commonSchemas } from '@validations/common.js';
+import { commonSchemas } from '@validations/common';
 import z from 'zod';
 
 export const signupSchema = z.object({

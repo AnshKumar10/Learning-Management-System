@@ -1,6 +1,6 @@
 import { ZodError, type ZodSchema } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '@middlewares/error.middleware.js';
+import { AppError } from '@middlewares/error.middleware';
 
 export function validateRequestPayload<T>(schema: ZodSchema<T>) {
   return (requset: Request, response: Response, next: NextFunction): void => {

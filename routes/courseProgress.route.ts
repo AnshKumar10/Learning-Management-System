@@ -1,11 +1,11 @@
 import express from 'express';
-import { isAuthenticated } from '@middlewares/auth.middleware.js';
+import { isAuthenticated } from '@middlewares/auth.middleware';
 import {
   getUserCourseProgress,
   updateLectureProgress,
   markCourseAsCompleted,
   resetCourseProgress,
-} from '@controllers/courseProgress.controller.js';
+} from '@controllers/courseProgress.controller';
 
 const router = express.Router();
 

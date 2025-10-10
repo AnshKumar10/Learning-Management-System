@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAuthenticated, restrictTo } from '@middlewares/auth.middleware.js';
+import { isAuthenticated, restrictTo } from '@middlewares/auth.middleware';
 import {
   createNewCourse,
   searchCourses,
@@ -9,8 +9,8 @@ import {
   getCourseDetails,
   addLectureToCourse,
   getCourseLectures,
-} from '@controllers/course.controller.js';
-import upload from '@utils/multer.js';
+} from '@controllers/course.controller';
+import upload from '@utils/multer';
 
 const router = express.Router();
 

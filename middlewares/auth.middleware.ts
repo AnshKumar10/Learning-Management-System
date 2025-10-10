@@ -1,6 +1,6 @@
-import { AppError, catchAsync } from '@middlewares/error.middleware.js';
-import { User } from '@models/user.model.js';
-import type { JwtPayloadInterface } from '@/types/core.js';
+import { AppError, catchAsync } from '@middlewares/error.middleware';
+import { User } from '@models/user.model';
+import type { JwtPayloadInterface } from '@/types/core';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 

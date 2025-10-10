@@ -1,5 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import { catchAsync } from '@middlewares/error.middleware.js';
+import { catchAsync } from '@middlewares/error.middleware';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);

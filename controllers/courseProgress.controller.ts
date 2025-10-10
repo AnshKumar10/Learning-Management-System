@@ -1,4 +1,4 @@
-import { catchAsync } from '@middlewares/error.middleware.js';
+import { catchAsync } from '@middlewares/error.middleware';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 /**

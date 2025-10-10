@@ -10,16 +10,16 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
-import type { AppError } from '@middlewares/error.middleware.ts';
-import userRoute from '@routes/user.route.js';
-import mediaRoute from '@routes/media.route.js';
-import courseRoute from '@routes/course.route.js';
-import purchaseRoute from '@routes/purchaseCourse.route.js';
-import courseProgressRoute from '@routes/courseProgress.route.js';
-import razorpayRoute from '@routes/razorpay.routes.js';
-import healthRoute from '@routes/health.routes.js';
-import connectDB from '@configs/database.config.js';
-import AppResponse from '@/utils/responseHandler.js';
+import type { AppError } from '@middlewares/error.middleware';
+import userRoute from '@routes/user.route';
+import mediaRoute from '@routes/media.route';
+import courseRoute from '@routes/course.route';
+import purchaseRoute from '@routes/purchaseCourse.route';
+import courseProgressRoute from '@routes/courseProgress.route';
+import razorpayRoute from '@routes/razorpay.routes';
+import healthRoute from '@routes/health.routes';
+import connectDB from '@configs/database.config';
+import AppResponse from '@utils/responseHandler';
 
 // Load environment variables
 dotenv.config();

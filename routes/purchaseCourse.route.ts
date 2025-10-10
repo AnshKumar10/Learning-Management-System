@@ -4,8 +4,8 @@ import {
   getPurchasedCourses,
   handleStripeWebhook,
   initiateStripeCheckout,
-} from '@controllers/coursePurchase.controller.js';
-import { isAuthenticated } from '@middlewares/auth.middleware.js';
+} from '@controllers/coursePurchase.controller';
+import { isAuthenticated } from '@middlewares/auth.middleware';
 
 const router = express.Router();
 

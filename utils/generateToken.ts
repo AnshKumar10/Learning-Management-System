@@ -1,4 +1,4 @@
-import type { UserInterface } from '@/types/core.js';
+import type { UserInterface } from '@/types/core';
 import type { Response } from 'express';
 import jwt from 'jsonwebtoken';
 

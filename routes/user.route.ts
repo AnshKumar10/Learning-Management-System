@@ -7,15 +7,15 @@ import {
   getCurrentUserProfile,
   signOutUser,
   updateUserProfile,
-} from '@controllers/user.controller.js';
-import { isAuthenticated } from '@middlewares/auth.middleware.js';
-import upload from '@utils/multer.js';
-import { validateRequestPayload } from '@middlewares/validation.middleware.js';
+} from '@controllers/user.controller';
+import { isAuthenticated } from '@middlewares/auth.middleware';
+import upload from '@utils/multer';
+import { validateRequestPayload } from '@middlewares/validation.middleware';
 import {
   passwordChangeSchema,
   signinSchema,
   signupSchema,
-} from '@/validations/user.js';
+} from '@validations/user';
 
 const router = express.Router();
 
