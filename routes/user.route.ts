@@ -12,9 +12,9 @@ import { isAuthenticated } from '@middlewares/auth.middleware';
 import upload from '@utils/multer';
 import { validateRequestPayload } from '@middlewares/validation.middleware';
 import {
-  passwordChangeSchema,
-  signinSchema,
   signupSchema,
+  signinSchema,
+  passwordChangeSchema,
 } from '@validations/user';
 
 const router = express.Router();

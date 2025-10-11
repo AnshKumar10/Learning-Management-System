@@ -1,15 +1,15 @@
-import { commonSchemas } from '@validations/common';
-import z from 'zod';
+import { z } from 'zod';
+import { zEmail, zPassword, zName } from '@validations/common';
 
 export const signupSchema = z.object({
-  name: commonSchemas.name,
-  email: commonSchemas.email,
-  password: commonSchemas.password,
+  name: zName,
+  email: zEmail,
+  password: zPassword,
 });
 
 export const signinSchema = z.object({
-  email: commonSchemas.email,
-  password: z.string().min(1, { message: 'Password is required' }),
+  email: zEmail,
+  password: zPassword,
 });
 
 export const passwordChangeSchema = z
@@ -17,13 +17,7 @@ export const passwordChangeSchema = z
     currentPassword: z
       .string()
       .min(1, { message: 'Current password is required' }),
-    newPassword: z
-      .string()
-      .min(1, { message: 'New password is required' })
-      .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/, {
-        message:
-          'Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character',
-      }),
+    newPassword: zPassword,
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: 'New password must be different from current password',

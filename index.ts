@@ -1,12 +1,12 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
-import type { AppError } from '@middlewares/error.middleware';
+// import mongoSanitize from 'express-mongo-sanitize';
+import { errorHandler } from '@middlewares/error.middleware';
 import userRoute from '@routes/user.route';
 import mediaRoute from '@routes/media.route';
 import courseRoute from '@routes/course.route';
@@ -15,7 +15,6 @@ import courseProgressRoute from '@routes/courseProgress.route';
 import razorpayRoute from '@routes/razorpay.routes';
 import healthRoute from '@routes/health.routes';
 import connectDB from '@configs/database.config';
-import AppResponse from '@utils/responseHandler';
 import { env } from '@configs/env.config';
 
 // Connect to database
@@ -33,7 +32,7 @@ const limiter = rateLimit({
 
 // Security Middleware
 app.use(helmet()); // Set security HTTP headers
-app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
+// app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use('/api', limiter); // Apply rate limiting to all routes
 
@@ -74,22 +73,10 @@ app.use('/api/v1/progress', courseProgressRoute);
 app.use('/api/v1/razorpay', razorpayRoute);
 app.use('/health', healthRoute);
 
-// 404 Handler
-app.use((_, response) => {
-  return response.status(404).json(new AppResponse('Route not found', 404));
-});
-
 // Global Error Handler
-app.use((error: AppError, _: Request, response: Response) => {
-  console.error(error);
-  return response.status(error.statusCode || 500).json({
-    status: 'error',
-    message: error.message || 'Internal server error',
-    ...(env.NODE_ENV === 'development' && { stack: error.stack }),
-  });
-});
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(` Server running on port ${PORT} in ${env.NODE_ENV} mode`);
+  console.log(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
 });

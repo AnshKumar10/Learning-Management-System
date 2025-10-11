@@ -1,23 +1,23 @@
-import { ZodError, type ZodSchema } from 'zod';
+import type { ZodSchema } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '@middlewares/error.middleware';
 
-export function validateRequestPayload<T>(schema: ZodSchema<T>) {
-  return (request: Request, _: Response, next: NextFunction): void => {
-    try {
-      schema.safeParse(request.body);
-      next();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const formattedErrors = error.issues.map((issue) => ({
-          path: issue.path.join('.'),
-          message: issue.message,
-        }));
+export const validateRequestPayload = <T>(schema: ZodSchema<T>) => {
+  return (request: Request, _: Response, next: NextFunction) => {
+    const result = schema.safeParse(request.body);
 
-        return next(new AppError('Validation failed', 400, formattedErrors));
-      }
+    if (!result.success) {
+      const formattedErrors = result?.error?.issues?.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      }));
 
-      return next(new AppError('Internal Server Error', 500));
+      return next({
+        statusCode: 400,
+        message: 'Validation failed',
+        errors: formattedErrors,
+      });
     }
+
+    return next();
   };
-}
+};

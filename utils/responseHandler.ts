@@ -1,18 +1,37 @@
-import type { Response } from 'express';
+import type {
+  ApiSuccessResponse,
+  ApiErrorResponse,
+  SendSuccessResponse,
+  SendErrorResponse,
+} from '@/types/response';
 
-class AppResponse<T = any> extends Response {
-  public statusCode: number;
-  public data: T | null | undefined;
-  public message: string;
-  public success: boolean;
+export const sendSuccessResponse = <T>({
+  response,
+  message,
+  data,
+  statusCode = 200,
+}: SendSuccessResponse<T>): void => {
+  const successResponse: ApiSuccessResponse<T> = {
+    success: true,
+    message,
+    data,
+  };
+  response.status(statusCode).json(successResponse);
+};
 
-  constructor(message: string, statusCode: number, data?: T) {
-    super();
-    this.statusCode = statusCode;
-    this.data = data;
-    this.message = message;
-    this.success = statusCode < 400;
-  }
-}
+export const sendErrorResponse = ({
+  response,
+  message,
+  statusCode = 500,
+  errors,
+  stack,
+}: SendErrorResponse): void => {
+  const errorResponse: ApiErrorResponse = {
+    success: false,
+    message,
+    ...(errors !== undefined && { errors }),
+    ...(stack !== undefined && { stack }),
+  };
 
-export default AppResponse;
+  response.status(statusCode).json(errorResponse);
+};
