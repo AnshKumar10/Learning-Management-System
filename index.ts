@@ -1,8 +1,4 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from 'express';
+import express, { type Request, type Response } from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -10,6 +6,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
 import type { AppError } from '@middlewares/error.middleware';
 import userRoute from '@routes/user.route';
 import mediaRoute from '@routes/media.route';
@@ -20,6 +17,7 @@ import razorpayRoute from '@routes/razorpay.routes';
 import healthRoute from '@routes/health.routes';
 import connectDB from '@configs/database.config';
 import AppResponse from '@utils/responseHandler';
+import { env } from '@configs/env.config';
 
 // Load environment variables
 dotenv.config();
@@ -28,7 +26,7 @@ dotenv.config();
 await connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT || 3000;
 
 // Global rate limiting
 const limiter = rateLimit({
@@ -39,13 +37,12 @@ const limiter = rateLimit({
 
 // Security Middleware
 app.use(helmet()); // Set security HTTP headers
-// app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
-// app.use(xss()); // Data sanitization against XSS
+app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use('/api', limiter); // Apply rate limiting to all routes
 
 // Logging Middleware
-if (process.env.NODE_ENV === 'development') {
+if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
@@ -57,7 +54,7 @@ app.use(cookieParser());
 // CORS Configuration
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: env.CLIENT_URL || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: [
@@ -82,30 +79,21 @@ app.use('/api/v1/razorpay', razorpayRoute);
 app.use('/health', healthRoute);
 
 // 404 Handler
-app.use((request, response) => {
+app.use((_, response) => {
   return response.status(404).json(new AppResponse('Route not found', 404));
 });
 
 // Global Error Handler
-app.use(
-  (
-    error: AppError,
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) => {
-    console.error(error);
-    return response.status(error.statusCode || 500).json({
-      status: 'error',
-      message: error.message || 'Internal server error',
-      ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
-    });
-  },
-);
+app.use((error: AppError, _: Request, response: Response) => {
+  console.error(error);
+  return response.status(error.statusCode || 500).json({
+    status: 'error',
+    message: error.message || 'Internal server error',
+    ...(env.NODE_ENV === 'development' && { stack: error.stack }),
+  });
+});
 
 // Start server
 app.listen(PORT, () => {
-  console.log(
-    ` Server running on port ${PORT} in ${process.env.NODE_ENV} mode`,
-  );
+  console.log(` Server running on port ${PORT} in ${env.NODE_ENV} mode`);
 });

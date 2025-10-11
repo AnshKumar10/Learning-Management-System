@@ -3,9 +3,9 @@ import type { Request, Response, NextFunction } from 'express';
 import { AppError } from '@middlewares/error.middleware';
 
 export function validateRequestPayload<T>(schema: ZodSchema<T>) {
-  return (requset: Request, response: Response, next: NextFunction): void => {
+  return (request: Request, _: Response, next: NextFunction): void => {
     try {
-      schema.parse(requset.body);
+      schema.safeParse(request.body);
       next();
     } catch (error) {
       if (error instanceof ZodError) {

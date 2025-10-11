@@ -1,13 +1,14 @@
 import type { UserInterface } from '@/types/core';
 import type { Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '@configs/env.config';
 
 export const generateToken = (
   response: Response,
   user: UserInterface,
   message: string,
 ) => {
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
+  const token = jwt.sign({ userId: user._id }, env.JWT_SECRET, {
     expiresIn: '1d',
   });
 

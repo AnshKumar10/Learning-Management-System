@@ -3,6 +3,7 @@ import { User } from '@models/user.model';
 import type { JwtPayloadInterface } from '@/types/core';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '@configs/env.config';
 
 export const isAuthenticated = catchAsync(
   async (request: Request, response: Response, next: NextFunction) => {
@@ -17,10 +18,7 @@ export const isAuthenticated = catchAsync(
 
     try {
       // Verify token
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET!,
-      ) as JwtPayloadInterface;
+      const decoded = jwt.verify(token, env.JWT_SECRET!) as JwtPayloadInterface;
 
       // Add user ID to request
       request.id = decoded.userId;
@@ -69,7 +67,7 @@ export const optionalAuth = catchAsync(
       if (token) {
         const decoded = jwt.verify(
           token,
-          process.env.JWT_SECRET!,
+          env.JWT_SECRET!,
         ) as JwtPayloadInterface;
         request.id = decoded.userId;
       }

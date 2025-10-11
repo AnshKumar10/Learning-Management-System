@@ -1,14 +1,8 @@
 import mongoose from 'mongoose';
+import { env } from '@configs/env.config';
 
 const MAX_RETRIES: number = 3;
 const RETRY_INTERVAL: number = 5000; // 5 seconds
-
-interface ConnectionStatus {
-  isConnected: boolean;
-  readyState: number;
-  host: string | undefined;
-  name: string | undefined;
-}
 
 class DatabaseConnection {
   private retryCount: number;
@@ -45,24 +39,22 @@ class DatabaseConnection {
 
   async connect() {
     try {
-      if (!process.env.MONGO_URI) {
+      if (!env.MONGO_URI) {
         throw new Error('MongoDB URI is not defined in environment variables');
       }
 
       const connectionOptions = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
         family: 4, // Use IPv4
       };
 
-      if (process.env.NODE_ENV === 'development') {
+      if (env.NODE_ENV === 'development') {
         mongoose.set('debug', true);
       }
 
-      await mongoose.connect(process.env.MONGO_URI, connectionOptions);
+      await mongoose.connect(env.MONGO_URI, connectionOptions);
       this.retryCount = 0; // Reset retry count on successful connection
     } catch (error) {
       console.error('Failed to connect to MongoDB:', error);

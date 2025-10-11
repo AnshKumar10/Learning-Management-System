@@ -1,8 +1,9 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import type { Request, RequestHandler, Response } from 'express';
 import { catchAsync } from '@middlewares/error.middleware';
 import Stripe from 'stripe';
+import { env } from '@configs/env.config';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
 /**
  * Create a Stripe checkout session for course purchase

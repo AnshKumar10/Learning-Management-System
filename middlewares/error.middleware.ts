@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { env } from '@configs/env.config';
 
 // Custom error class
 export class AppError extends Error {
@@ -48,14 +49,13 @@ export const catchAsync = (
 // Global error handling middleware
 export const errorHandler = (
   error: AppError,
-  request: Request,
+  _: Request,
   response: Response,
-  next: NextFunction,
 ): void => {
   error.statusCode = error.statusCode || 500;
   error.status = error.status || 'error';
 
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'development') {
     response.status(error.statusCode).json({
       status: error.status,
       error: error,
