@@ -1,8 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { env } from '@configs/env.config';
-import dotenv from 'dotenv';
-
-dotenv.config({});
 
 cloudinary.config({
   api_key: env.CLOUDINARY_API_KEY,

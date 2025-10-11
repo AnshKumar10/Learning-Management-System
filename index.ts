@@ -1,5 +1,4 @@
 import express, { type Request, type Response } from 'express';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -18,9 +17,6 @@ import healthRoute from '@routes/health.routes';
 import connectDB from '@configs/database.config';
 import AppResponse from '@utils/responseHandler';
 import { env } from '@configs/env.config';
-
-// Load environment variables
-dotenv.config();
 
 // Connect to database
 await connectDB();

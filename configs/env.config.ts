@@ -1,5 +1,9 @@
 import { commonSchemas } from '@/validations/common';
 import { z } from 'zod';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const { zNumberFromString, zEnumFromEnv, zURL, zEmail } = commonSchemas;
 
