@@ -13,7 +13,7 @@ export const isAuthenticated = catchAsync(
     if (!token) {
       return next({
         statusCode: 401,
-        message: 'You are not logged in. Please log in to get access.',
+        message: 'You are not logged in. Please log in to get access.'
       });
     }
 
@@ -26,7 +26,7 @@ export const isAuthenticated = catchAsync(
       if (!user) {
         return next({
           statusCode: 404,
-          message: 'User not found',
+          message: 'User not found'
         });
       }
 
@@ -37,48 +37,48 @@ export const isAuthenticated = catchAsync(
       if (error.name === 'JsonWebTokenError') {
         return next({
           statusCode: 401,
-          message: 'Invalid token. Please log in again.',
+          message: 'Invalid token. Please log in again.'
         });
       }
 
       if (error.name === 'TokenExpiredError') {
         return next({
           statusCode: 401,
-          message: 'Your token has expired. Please log in again.',
+          message: 'Your token has expired. Please log in again.'
         });
       }
 
       return next({
         statusCode: 500,
-        message: 'Authentication error',
+        message: 'Authentication error'
       });
     }
-  },
+  }
 );
 
 export const restrictTo = (...roles: string[]) => {
   return catchAsync(
-    async (request: Request, _response: Response, next: NextFunction) => {
-      if (!roles.includes(request.user.role)) {
+    async (request: Request, _: Response, next: NextFunction) => {
+      if (request.user?.role && !roles.includes(request.user.role)) {
         return next({
           statusCode: 403,
-          message: 'You do not have permission to perform this action',
+          message: 'You do not have permission to perform this action'
         });
       }
 
       next();
-    },
+    }
   );
 };
 
 export const optionalAuth = catchAsync(
-  async (request: Request, _response: Response, next: NextFunction) => {
+  async (request: Request, _: Response, next: NextFunction) => {
     try {
       const token = request.cookies.token;
       if (token) {
         const decoded = jwt.verify(
           token,
-          env.JWT_SECRET!,
+          env.JWT_SECRET!
         ) as JwtPayloadInterface;
         request.id = decoded.userId;
       }
@@ -86,5 +86,5 @@ export const optionalAuth = catchAsync(
     } catch {
       next();
     }
-  },
+  }
 );

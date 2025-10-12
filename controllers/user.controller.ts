@@ -2,7 +2,7 @@ import type { Request, RequestHandler, Response } from 'express';
 import { catchAsync } from '@middlewares/error.middleware';
 import {
   sendErrorResponse,
-  sendSuccessResponse,
+  sendSuccessResponse
 } from '@/utils/responseHandler';
 import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
@@ -21,13 +21,13 @@ export const createUserAccount: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Email already in use',
-        statusCode: 409,
+        statusCode: 409
       });
     }
 
     const user = await User.create({ name, email, password });
     generateToken(response, user, 'User account created successfully');
-  },
+  }
 );
 
 /**
@@ -44,7 +44,7 @@ export const authenticateUser: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404,
+        statusCode: 404
       });
     }
 
@@ -54,13 +54,13 @@ export const authenticateUser: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Invalid credentials',
-        statusCode: 401,
+        statusCode: 401
       });
     }
 
     await user.updateLastActive();
     generateToken(response, user, 'Logged in successfully');
-  },
+  }
 );
 
 /**
@@ -73,9 +73,9 @@ export const signOutUser: RequestHandler = catchAsync(
     sendSuccessResponse({
       response,
       message: 'Signed out successfully',
-      data: null,
+      data: null
     });
-  },
+  }
 );
 
 /**
@@ -84,8 +84,31 @@ export const signOutUser: RequestHandler = catchAsync(
  */
 export const getCurrentUserProfile: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement get current user profile functionality
-  },
+    const userId = request.id;
+
+    const user = User.findById(userId);
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: 404
+      });
+    }
+
+    const result = await user.populate([
+      {
+        path: 'enrolledCourses',
+        select: 'title description thumbnail'
+      }
+    ]);
+
+    sendSuccessResponse({
+      response,
+      message: 'User profile fetched successfully',
+      data: result
+    });
+  }
 );
 
 /**
@@ -93,7 +116,7 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
  * @route PATCH /api/v1/users/profile
  */
 export const updateUserProfile: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {},
+  async (request: Request, response: Response) => {}
 );
 
 /**
@@ -101,9 +124,7 @@ export const updateUserProfile: RequestHandler = catchAsync(
  * @route PATCH /api/v1/users/password
  */
 export const changeUserPassword: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {
-    // TODO: Implement change user password functionality
-  },
+  async (request: Request, response: Response) => {}
 );
 
 /**
@@ -113,7 +134,7 @@ export const changeUserPassword: RequestHandler = catchAsync(
 export const forgotPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement forgot password functionality
-  },
+  }
 );
 
 /**
@@ -123,7 +144,7 @@ export const forgotPassword: RequestHandler = catchAsync(
 export const resetPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement reset password functionality
-  },
+  }
 );
 
 /**
@@ -133,5 +154,5 @@ export const resetPassword: RequestHandler = catchAsync(
 export const deleteUserAccount: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement delete user account functionality
-  },
+  }
 );
