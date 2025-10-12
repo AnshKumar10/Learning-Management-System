@@ -8,7 +8,7 @@ import { ApiError } from '@/types/response';
 
 export const isAuthenticated = catchAsync(
   async (request: Request, _: Response, next: NextFunction) => {
-    const token = request.cookies.token;
+    const token = request.cookies.access_token;
 
     if (!token) {
       return next({
@@ -18,7 +18,7 @@ export const isAuthenticated = catchAsync(
     }
 
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET!) as JwtPayloadInterface;
+      const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadInterface;
 
       request.id = decoded.userId;
       const user = await User.findById(request.id);

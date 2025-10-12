@@ -1,10 +1,8 @@
 import type { Request, RequestHandler, Response } from 'express';
 import { catchAsync } from '@middlewares/error.middleware';
-import {
-  sendErrorResponse,
-  sendSuccessResponse,
-} from '@/utils/responseHandler';
+import { sendErrorResponse } from '@/utils/responseHandler';
 import { User } from '@/models/user.model';
+import { generateToken } from '@/utils/generateToken';
 
 /**
  * Create a new user account
@@ -12,37 +10,20 @@ import { User } from '@/models/user.model';
  */
 export const createUserAccount: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    try {
-      const { name, email, password } = request.body;
+    const { name, email, password } = request.body;
 
-      const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-      if (existingUser) {
-        return sendErrorResponse({
-          response,
-          message: 'Email already in use',
-          statusCode: 409,
-          errors: [{ path: 'email', message: 'Email already registered' }],
-        });
-      }
-
-      const newUser = await User.create({ name, email, password });
-
-      sendSuccessResponse({
-        response,
-        message: 'User account created successfully',
-        data: {
-          id: newUser._id,
-          name: newUser.name,
-        },
-        statusCode: 201,
-      });
-    } catch (error) {
+    if (existingUser) {
       return sendErrorResponse({
         response,
-        message: 'Internal Server Error',
+        message: 'Email already in use',
+        statusCode: 409,
       });
     }
+
+    const user = await User.create({ name, email, password });
+    generateToken(response, user, 'User account created successfully');
   },
 );
 
@@ -52,7 +33,30 @@ export const createUserAccount: RequestHandler = catchAsync(
  */
 export const authenticateUser: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement user authentication functionality
+    const { email, password } = request.body;
+
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: 404,
+      });
+    }
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return sendErrorResponse({
+        response,
+        message: 'Invalid credentials',
+        statusCode: 401,
+      });
+    }
+
+    await user.updateLastActive();
+    generateToken(response, user, 'Logged in successfully');
   },
 );
 

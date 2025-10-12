@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { env } from '@configs/env.config';
 import { sendErrorResponse } from '@/utils/responseHandler';
 import { ApiError } from '@/types/response';
@@ -7,6 +7,7 @@ export const errorHandler = (
   error: ApiError,
   _: Request,
   response: Response,
+  __: NextFunction,
 ): void => {
   const statusCode = error.statusCode || 500;
   const message = error.message || 'Something went wrong';
@@ -22,8 +23,8 @@ export const catchAsync = (
     response: Response,
     next: NextFunction,
   ) => Promise<any>,
-) => {
-  return (request: Request, response: Response, next: NextFunction): void => {
+): RequestHandler => {
+  return (request, response, next) => {
     fn(request, response, next).catch(next);
   };
 };

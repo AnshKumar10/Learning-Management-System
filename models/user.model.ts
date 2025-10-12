@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { UserDocumentType, UserModelType } from '@/types/user';
 
-const userSchema = new mongoose.Schema(
+export const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -75,21 +76,11 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Encrypt password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
-
-// Compare password method
+// Instance Methods
 userSchema.methods.comparePassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Generate password reset token
 userSchema.methods.getResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
   this.resetPasswordToken = crypto
@@ -100,15 +91,24 @@ userSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-// Virtual field for total enrolled courses
-userSchema.virtual('totalEnrolledCourses').get(function () {
-  return this.enrolledCourses?.length;
-});
-
-// Update lastActive timestamp
-userSchema.methods.updateLastActive = function () {
+userSchema.methods.updateLastActive = async function () {
   this.lastActive = Date.now();
   return this.save({ validateBeforeSave: false });
 };
 
-export const User = mongoose.model('User', userSchema);
+// Virtuals
+userSchema.virtual('totalEnrolledCourses').get(function () {
+  return this.enrolledCourses?.length;
+});
+
+// Hooks
+userSchema.pre<UserDocumentType>('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+export const User = mongoose.model<UserDocumentType, UserModelType>(
+  'User',
+  userSchema,
+);

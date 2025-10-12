@@ -21,7 +21,7 @@ import { env } from '@configs/env.config';
 await connectDB();
 
 const app = express();
-const PORT = env.PORT || 3000;
+const PORT = env.PORT || 8000;
 
 // Global rate limiting
 const limiter = rateLimit({
