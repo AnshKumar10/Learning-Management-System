@@ -12,6 +12,10 @@ export const signinSchema = z.object({
   password: zPassword
 });
 
+export const deleteAccountSchema = z.object({
+  password: zRequiredString('Password is required')
+});
+
 export const passwordChangeSchema = z.object({
   currentPassword: zRequiredString('Current password is required'),
   newPassword: zRequiredString('New password is required')

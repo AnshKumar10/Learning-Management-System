@@ -21,7 +21,7 @@ export const isAuthenticated = catchAsync(
       const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadInterface;
 
       request.id = decoded.userId;
-      const user = await User.findById(request.id);
+      const user = await User.findById(request.id).where({ isActive: true });
 
       if (!user) {
         return next({

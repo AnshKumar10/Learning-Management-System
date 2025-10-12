@@ -9,7 +9,7 @@ export const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Name is required'],
       trim: true,
-      maxLength: [50, 'Name cannot exceed 50 characters'],
+      maxLength: [50, 'Name cannot exceed 50 characters']
     },
     email: {
       type: String,
@@ -19,66 +19,70 @@ export const userSchema = new mongoose.Schema(
       lowercase: true,
       match: [
         /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-        'Please provide a valid email',
-      ],
+        'Please provide a valid email'
+      ]
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
       minLength: [8, 'Password must be at least 8 characters'],
-      select: false,
+      select: false
     },
     role: {
       type: String,
       enum: {
         values: ['student', 'instructor', 'admin'],
-        message: 'Please select a valid role',
+        message: 'Please select a valid role'
       },
-      default: 'student',
+      default: 'student'
     },
     avatar: {
       type: String,
-      default: 'default-avatar.png',
+      default: 'default-avatar.png'
     },
     bio: {
       type: String,
-      maxLength: [200, 'Bio cannot exceed 200 characters'],
+      maxLength: [200, 'Bio cannot exceed 200 characters']
+    },
+    isActive: {
+      type: Boolean,
+      default: true
     },
     enrolledCourses: [
       {
         course: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Course',
+          ref: 'Course'
         },
         enrolledAt: {
           type: Date,
-          default: Date.now,
-        },
-      },
+          default: Date.now
+        }
+      }
     ],
     createdCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-      },
+        ref: 'Course'
+      }
     ],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     lastActive: {
       type: Date,
-      default: Date.now,
-    },
+      default: Date.now
+    }
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  },
+    toObject: { virtuals: true }
+  }
 );
 
 // Instance Methods
-userSchema.methods.comparePassword = async function (enteredPassword: string) {
-  return await bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.comparePassword = async function (password: string) {
+  return await bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.getResetPasswordToken = function () {
@@ -110,5 +114,5 @@ userSchema.pre<UserDocumentType>('save', async function (next) {
 
 export const User = mongoose.model<UserDocumentType, UserModelType>(
   'User',
-  userSchema,
+  userSchema
 );

@@ -1,12 +1,12 @@
 import express from 'express';
 import {
-  authenticateUser,
+  signInUser,
   changeUserPassword,
   createUserAccount,
   deleteUserAccount,
   getCurrentUserProfile,
   signOutUser,
-  updateUserProfile,
+  updateUserProfile
 } from '@controllers/user.controller';
 import { isAuthenticated } from '@middlewares/auth.middleware';
 import upload from '@utils/multer';
@@ -15,13 +15,14 @@ import {
   signupSchema,
   signinSchema,
   passwordChangeSchema,
+  deleteAccountSchema
 } from '@validations/user';
 
 const router = express.Router();
 
 // Auth routes
 router.post('/signup', validateRequestPayload(signupSchema), createUserAccount);
-router.post('/signin', validateRequestPayload(signinSchema), authenticateUser);
+router.post('/signin', validateRequestPayload(signinSchema), signInUser);
 router.post('/signout', signOutUser);
 
 // Profile routes
@@ -30,7 +31,7 @@ router.patch(
   '/profile',
   isAuthenticated,
   upload.single('avatar'),
-  updateUserProfile,
+  updateUserProfile
 );
 
 // Password management
@@ -38,10 +39,15 @@ router.patch(
   '/change-password',
   isAuthenticated,
   validateRequestPayload(passwordChangeSchema),
-  changeUserPassword,
+  changeUserPassword
 );
 
 // Account management
-router.delete('/account', isAuthenticated, deleteUserAccount);
+router.delete(
+  '/account',
+  isAuthenticated,
+  validateRequestPayload(deleteAccountSchema),
+  deleteUserAccount
+);
 
 export default router;

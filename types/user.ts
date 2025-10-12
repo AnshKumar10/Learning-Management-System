@@ -6,7 +6,7 @@ type UserSchemaFields = InferSchemaType<typeof userSchema> & {
 };
 
 type UserMethods = {
-  comparePassword(enteredPassword: string): Promise<boolean>;
+  comparePassword(password: string): Promise<boolean>;
   getResetPasswordToken(): string;
   updateLastActive(): Promise<UserDocumentType>;
 };

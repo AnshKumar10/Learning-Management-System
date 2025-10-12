@@ -34,13 +34,13 @@ export const createUserAccount: RequestHandler = catchAsync(
  * Authenticate user and get token
  * @route POST /api/v1/users/signin
  */
-export const authenticateUser: RequestHandler = catchAsync(
+export const signInUser: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const { email, password } = request.body;
 
     const user = await User.findOne({ email }).select('+password');
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return sendErrorResponse({
         response,
         message: 'User not found',
@@ -86,9 +86,9 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const userId = request.id;
 
-    const user = User.findById(userId);
+    const user = await User.findById(userId).select('-password');
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return sendErrorResponse({
         response,
         message: 'User not found',
@@ -187,6 +187,38 @@ export const resetPassword: RequestHandler = catchAsync(
  */
 export const deleteUserAccount: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement delete user account functionality
+    const userId = request.id;
+
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: 404
+      });
+    }
+
+    const { password } = request.body;
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return sendErrorResponse({
+        response,
+        message: 'Password is incorrect',
+        statusCode: 401
+      });
+    }
+
+    user.isActive = false;
+
+    await user.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'User account deleted successfully',
+      data: null
+    });
   }
 );
