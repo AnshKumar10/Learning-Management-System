@@ -1,6 +1,9 @@
 import type { Request, RequestHandler, Response } from 'express';
 import { catchAsync } from '@middlewares/error.middleware';
-import { sendErrorResponse } from '@/utils/responseHandler';
+import {
+  sendErrorResponse,
+  sendSuccessResponse,
+} from '@/utils/responseHandler';
 import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
 
@@ -65,8 +68,13 @@ export const authenticateUser: RequestHandler = catchAsync(
  * @route POST /api/v1/users/signout
  */
 export const signOutUser: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {
-    // TODO: Implement sign out functionality
+  async (_: Request, response: Response) => {
+    response.cookie('access_token', '', { maxAge: 0 });
+    sendSuccessResponse({
+      response,
+      message: 'Signed out successfully',
+      data: null,
+    });
   },
 );
 
