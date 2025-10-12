@@ -124,7 +124,41 @@ export const updateUserProfile: RequestHandler = catchAsync(
  * @route PATCH /api/v1/users/password
  */
 export const changeUserPassword: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {}
+  async (request: Request, response: Response) => {
+    const userId = request.id;
+
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: 404
+      });
+    }
+
+    const { currentPassword, newPassword } = request.body;
+
+    const isMatch = await user.comparePassword(currentPassword);
+
+    if (!isMatch) {
+      return sendErrorResponse({
+        response,
+        message: 'Current password is incorrect',
+        statusCode: 401
+      });
+    }
+
+    user.password = newPassword;
+
+    await user.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Password changed successfully',
+      data: null
+    });
+  }
 );
 
 /**
