@@ -7,7 +7,8 @@ import {
   getCurrentUserProfile,
   signOutUser,
   updateUserProfile,
-  resetPassword
+  resetPassword,
+  forgotPassword
 } from '@controllers/user.controller';
 import { isAuthenticated } from '@middlewares/auth.middleware';
 import upload from '@utils/multer';
@@ -16,7 +17,8 @@ import {
   signupSchema,
   signinSchema,
   passwordChangeSchema,
-  deleteAccountSchema
+  deleteAccountSchema,
+  forgotPasswordSchema
 } from '@validations/user';
 
 const router = express.Router();
@@ -42,8 +44,14 @@ router.patch(
   validateRequestPayload(passwordChangeSchema),
   changeUserPassword
 );
-router.patch(
-  '/reset-password',
+router.post(
+  '/forgot-password',
+  isAuthenticated,
+  validateRequestPayload(forgotPasswordSchema),
+  forgotPassword
+);
+router.post(
+  '/reset-password/:token',
   isAuthenticated,
   validateRequestPayload(deleteAccountSchema),
   resetPassword

@@ -168,7 +168,27 @@ export const changeUserPassword: RequestHandler = catchAsync(
  */
 export const forgotPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement forgot password functionality
+    const { email } = request.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: 404
+      });
+    }
+
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    sendSuccessResponse({
+      response,
+      message: 'Password reset token generated',
+      data: { resetToken }
+    });
   }
 );
 
