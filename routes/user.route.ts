@@ -11,14 +11,14 @@ import {
   forgotPassword
 } from '@controllers/user.controller';
 import { isAuthenticated } from '@middlewares/auth.middleware';
-import upload from '@utils/multer';
 import { validateRequestPayload } from '@middlewares/validation.middleware';
 import {
   signupSchema,
   signinSchema,
   passwordChangeSchema,
   deleteAccountSchema,
-  forgotPasswordSchema
+  forgotPasswordSchema,
+  updateUserProfileSchema
 } from '@validations/user';
 
 const router = express.Router();
@@ -33,7 +33,7 @@ router.get('/profile', isAuthenticated, getCurrentUserProfile);
 router.patch(
   '/profile',
   isAuthenticated,
-  upload.single('avatar'),
+  validateRequestPayload(updateUserProfileSchema),
   updateUserProfile
 );
 

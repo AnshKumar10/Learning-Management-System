@@ -7,6 +7,7 @@ import {
 } from '@/utils/responseHandler';
 import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
+import { STATUS_CODES } from '@/constants';
 
 /**
  * Create a new user account
@@ -22,12 +23,16 @@ export const createUserAccount: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Email already in use',
-        statusCode: 409
+        statusCode: STATUS_CODES.CONFLICT
       });
     }
 
     const user = await User.create({ name, email, password });
-    generateToken(response, user, 'User account created successfully');
+    generateToken(
+      response,
+      user,
+      `Account created successfully. Welcome, ${name} !`
+    );
   }
 );
 
@@ -45,7 +50,7 @@ export const signInUser: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -55,12 +60,16 @@ export const signInUser: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Invalid credentials',
-        statusCode: 401
+        statusCode: STATUS_CODES.UNAUTHORIZED
       });
     }
 
     await user.updateLastActive();
-    generateToken(response, user, 'Logged in successfully');
+    generateToken(
+      response,
+      user,
+      `Login successful. Welcome back, ${user.name} !`
+    );
   }
 );
 
@@ -73,7 +82,7 @@ export const signOutUser: RequestHandler = catchAsync(
     response.cookie('access_token', '', { maxAge: 0 });
     sendSuccessResponse({
       response,
-      message: 'Signed out successfully',
+      message: 'Signout successful.',
       data: null
     });
   }
@@ -87,13 +96,15 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const userId = request.id;
 
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(userId).select(
+      'name email role avatar isActive bio totalEnrolledCourses enrolledCourses'
+    );
 
     if (!user || !user.isActive) {
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -106,7 +117,7 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'User profile fetched successfully',
+      message: 'User profile retrieved successfully.',
       data: result
     });
   }
@@ -117,7 +128,32 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
  * @route PATCH /api/v1/users/profile
  */
 export const updateUserProfile: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {}
+  async (request: Request, response: Response) => {
+    const userId = request.id;
+
+    const user = await User.findById(userId);
+
+    if (!user || !user.isActive) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found',
+        statusCode: STATUS_CODES.NOT_FOUND
+      });
+    }
+
+    const { name, bio } = request.body;
+
+    if (name) user.name = name;
+    if (bio) user.bio = bio;
+
+    await user.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Profile updated successfully.',
+      data: { name, bio }
+    });
+  }
 );
 
 /**
@@ -134,7 +170,7 @@ export const changeUserPassword: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -145,8 +181,8 @@ export const changeUserPassword: RequestHandler = catchAsync(
     if (!isMatch) {
       return sendErrorResponse({
         response,
-        message: 'Current password is incorrect',
-        statusCode: 401
+        message: 'The current password you entered is incorrect.',
+        statusCode: STATUS_CODES.UNAUTHORIZED
       });
     }
 
@@ -156,7 +192,7 @@ export const changeUserPassword: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'Password changed successfully',
+      message: 'Password updated successfully.',
       data: null
     });
   }
@@ -176,7 +212,7 @@ export const forgotPassword: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -186,7 +222,7 @@ export const forgotPassword: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'Password reset token generated',
+      message: 'Password reset instructions have been sent to your email.',
       data: { resetToken }
     });
   }
@@ -204,7 +240,7 @@ export const resetPassword: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Token is required',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -220,7 +256,7 @@ export const resetPassword: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Invalid or expired token',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -234,7 +270,7 @@ export const resetPassword: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'Password reset successfully',
+      message: 'Your password has been reset successfully.',
       data: null
     });
   }
@@ -254,7 +290,7 @@ export const deleteUserAccount: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'User not found',
-        statusCode: 404
+        statusCode: STATUS_CODES.NOT_FOUND
       });
     }
 
@@ -266,7 +302,7 @@ export const deleteUserAccount: RequestHandler = catchAsync(
       return sendErrorResponse({
         response,
         message: 'Password is incorrect',
-        statusCode: 401
+        statusCode: STATUS_CODES.UNAUTHORIZED
       });
     }
 
@@ -276,7 +312,7 @@ export const deleteUserAccount: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'User account deleted successfully',
+      message: "Your account has been deleted. We're sorry to see you go.",
       data: null
     });
   }

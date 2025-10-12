@@ -1,57 +1,65 @@
-import { commonSchemas } from '@/validations/common';
+import {
+  zEmail,
+  zEnumFromEnv,
+  zNumberFromString,
+  zRequiredString,
+  zURL
+} from '@/validations/common';
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
-const { zNumberFromString, zEnumFromEnv, zURL, zEmail } = commonSchemas;
-
 const envSchema = z.object({
   // Server
-  PORT: zNumberFromString('PORT must be a number'),
+  PORT: zNumberFromString('PORT must be a valid number'),
   NODE_ENV: zEnumFromEnv(['development', 'production', 'test']),
 
   // MongoDB
-  MONGO_URI: zURL,
+  MONGO_URI: zURL(),
 
   // JWT
-  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
-  JWT_EXPIRES_IN: z.string().min(1, 'JWT_EXPIRES_IN is required'),
+  JWT_SECRET: zRequiredString('JWT_SECRET'),
+  JWT_EXPIRES_IN: zRequiredString('JWT_EXPIRES_IN'),
   JWT_COOKIE_EXPIRES_IN: zNumberFromString(
-    'JWT_COOKIE_EXPIRES_IN must be a number',
+    'JWT_COOKIE_EXPIRES_IN must be a valid number'
   ),
 
   // Client
-  CLIENT_URL: zURL,
+  CLIENT_URL: zURL(),
 
   // Cloudinary
-  CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
-  CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
-  CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),
+  CLOUDINARY_CLOUD_NAME: zRequiredString('CLOUDINARY_CLOUD_NAME'),
+  CLOUDINARY_API_KEY: zRequiredString('CLOUDINARY_API_KEY'),
+  CLOUDINARY_API_SECRET: zRequiredString('CLOUDINARY_API_SECRET'),
 
   // SMTP
-  SMTP_HOST: z.string().min(1, 'SMTP_HOST is required'),
-  SMTP_PORT: zNumberFromString('SMTP_PORT must be a number'),
-  SMTP_USER: zEmail,
-  SMTP_PASS: z.string().min(1, 'SMTP_PASS is required'),
+  SMTP_HOST: zRequiredString('SMTP_HOST'),
+  SMTP_PORT: zNumberFromString('SMTP_PORT must be a valid number'),
+  SMTP_USER: zEmail(),
+  SMTP_PASS: zRequiredString('SMTP_PASS'),
 
   // Stripe
-  STRIPE_SECRET_KEY: z.string().min(1, 'STRIPE_SECRET_KEY is required'),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1, 'STRIPE_WEBHOOK_SECRET is required'),
+  STRIPE_SECRET_KEY: zRequiredString('STRIPE_SECRET_KEY'),
+  STRIPE_WEBHOOK_SECRET: zRequiredString('STRIPE_WEBHOOK_SECRET'),
 
   // Upload
-  MAX_FILE_SIZE: zNumberFromString('MAX_FILE_SIZE must be a number'),
-  UPLOAD_PATH: z.string().min(1, 'UPLOAD_PATH is required'),
+  MAX_FILE_SIZE: zNumberFromString('MAX_FILE_SIZE must be a valid number'),
+  UPLOAD_PATH: zRequiredString('UPLOAD_PATH'),
 
   // Security
-  BCRYPT_SALT_ROUNDS: zNumberFromString('BCRYPT_SALT_ROUNDS must be a number'),
-  RATE_LIMIT_WINDOW: zNumberFromString('RATE_LIMIT_WINDOW must be a number'),
-  RATE_LIMIT_MAX: zNumberFromString('RATE_LIMIT_MAX must be a number'),
+  BCRYPT_SALT_ROUNDS: zNumberFromString(
+    'BCRYPT_SALT_ROUNDS must be a valid number'
+  ),
+  RATE_LIMIT_WINDOW: zNumberFromString(
+    'RATE_LIMIT_WINDOW must be a valid number'
+  ),
+  RATE_LIMIT_MAX: zNumberFromString('RATE_LIMIT_MAX must be a valid number'),
 
   // Razorpay
-  RAZORPAY_KEY_ID: z.string().min(1, 'RAZORPAY_KEY_ID is required'),
-  RAZORPAY_KEY_SECRET: z.string().min(1, 'RAZORPAY_KEY_SECRET is required'),
+  RAZORPAY_KEY_ID: zRequiredString('RAZORPAY_KEY_ID'),
+  RAZORPAY_KEY_SECRET: zRequiredString('RAZORPAY_KEY_SECRET')
 });
 
 const createEnv = () => {
@@ -61,7 +69,7 @@ const createEnv = () => {
     console.error('❌ Invalid environment variables:');
     const formattedErrors = parsed.error.issues.map((issue) => ({
       path: issue.path.join('.'),
-      message: issue.message,
+      message: issue.message
     }));
     console.error(formattedErrors);
     throw new Error('Invalid environment variables');
