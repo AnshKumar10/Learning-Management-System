@@ -1,5 +1,6 @@
 import type { Request, RequestHandler, Response } from 'express';
 import { catchAsync } from '@middlewares/error.middleware';
+import crypto from 'crypto';
 import {
   sendErrorResponse,
   sendSuccessResponse
@@ -177,7 +178,45 @@ export const forgotPassword: RequestHandler = catchAsync(
  */
 export const resetPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement reset password functionality
+    const { token } = request.params;
+
+    if (!token) {
+      return sendErrorResponse({
+        response,
+        message: 'Token is required',
+        statusCode: 404
+      });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex'),
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'Invalid or expired token',
+        statusCode: 404
+      });
+    }
+
+    const { password } = request.body;
+
+    user.password = password;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpire = null;
+
+    await user.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Password reset successfully',
+      data: null
+    });
   }
 );
 

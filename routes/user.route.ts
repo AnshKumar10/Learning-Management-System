@@ -6,7 +6,8 @@ import {
   deleteUserAccount,
   getCurrentUserProfile,
   signOutUser,
-  updateUserProfile
+  updateUserProfile,
+  resetPassword
 } from '@controllers/user.controller';
 import { isAuthenticated } from '@middlewares/auth.middleware';
 import upload from '@utils/multer';
@@ -40,6 +41,12 @@ router.patch(
   isAuthenticated,
   validateRequestPayload(passwordChangeSchema),
   changeUserPassword
+);
+router.patch(
+  '/reset-password',
+  isAuthenticated,
+  validateRequestPayload(deleteAccountSchema),
+  resetPassword
 );
 
 // Account management
