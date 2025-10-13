@@ -13,6 +13,7 @@ import {
 import upload from '@utils/multer';
 import { validateRequestPayload } from '@/middlewares/validation.middleware';
 import { createCourseSchema } from '@/validations/course';
+import { createLectureSchema } from '@/validations/lecture';
 
 const router = express.Router();
 
@@ -48,6 +49,10 @@ router
 router
   .route('/c/:courseId/lectures')
   .get(getCourseLectures)
-  .post(restrictTo('instructor'), upload.single('video'), addLectureToCourse);
+  .post(
+    restrictTo('instructor'),
+    validateRequestPayload(createLectureSchema),
+    addLectureToCourse
+  );
 
 export default router;

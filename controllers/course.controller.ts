@@ -1,6 +1,10 @@
 import { Course } from '@/models/course.model';
+import { Lecture } from '@/models/lecture.model';
 import { User } from '@/models/user.model';
-import { sendSuccessResponse } from '@/utils/responseHandler';
+import {
+  sendErrorResponse,
+  sendSuccessResponse
+} from '@/utils/responseHandler';
 import { catchAsync } from '@middlewares/error.middleware';
 import type { Request, RequestHandler, Response } from 'express';
 
@@ -66,10 +70,15 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const instructorId = request.id;
 
-    const courses = await Course.find({ instructor: instructorId }).populate({
-      path: 'enrolledStudents',
-      select: 'name avatar'
-    });
+    const courses = await Course.find({ instructor: instructorId })
+      .populate({
+        path: 'enrolledStudents',
+        select: 'name avatar'
+      })
+      .populate({
+        path: 'lectures',
+        select: 'title description'
+      });
 
     sendSuccessResponse({
       response,
@@ -97,10 +106,15 @@ export const getCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const { courseId } = request.params;
 
-    const course = await Course.findById(courseId).populate({
-      path: 'enrolledStudents',
-      select: 'name avatar'
-    });
+    const course = await Course.findById(courseId)
+      .populate({
+        path: 'enrolledStudents',
+        select: 'name avatar'
+      })
+      .populate({
+        path: 'lectures',
+        select: 'title description'
+      });
 
     sendSuccessResponse({
       response,
@@ -116,7 +130,45 @@ export const getCourseDetails: RequestHandler = catchAsync(
  */
 export const addLectureToCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement add lecture to course functionality
+    const courseId = request.params.courseId;
+    const instructorId = request.id;
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return sendErrorResponse({
+        response,
+        message: 'Course not found'
+      });
+    }
+
+    if (course.instructor.toString() !== instructorId) {
+      return sendErrorResponse({
+        response,
+        message: 'Not authorized to update this course'
+      });
+    }
+
+    const { title, description, isPreview } = request.body;
+
+    const lecture = await Lecture.create({
+      title,
+      description,
+      isPreview,
+      order: course.lectures.length + 1,
+      videoUrl: 'TO BE ADDED LATER',
+      publicId: 'TO BE ADDED LATER',
+      duration: 0
+    });
+
+    course.lectures.push(lecture._id);
+    await course.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Lectures added successfully',
+      data: course
+    });
   }
 );
 

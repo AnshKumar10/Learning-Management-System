@@ -43,13 +43,18 @@ export const zName = (
 export const zURL = () =>
   z.string().url({ message: 'Please provide a valid URL' });
 
-export const zPrice = () =>
+export const zPrice = (fieldName = 'Price') =>
   z
-    .number({ error: () => ({ message: 'Price must be a number' }) })
-    .nonnegative({ message: 'Price must be a positive number' });
+    .number({ message: `${fieldName} must be a number` })
+    .nonnegative({ message: `${fieldName} must be a positive number` });
 
 export const zRequiredString = (fieldName: string) =>
   z.string().min(1, { message: `${fieldName} is required` });
+
+export const zBoolean = (isOptional = false) => {
+  const base = z.boolean();
+  return isOptional ? base.optional() : base;
+};
 
 export const commonSchemas = {
   zEmail,
