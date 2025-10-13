@@ -178,6 +178,19 @@ export const addLectureToCourse: RequestHandler = catchAsync(
  */
 export const getCourseLectures: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement get course lectures functionality
+    const { courseId } = request.params;
+
+    const courses = await Course.findById(courseId)
+      .populate({
+        path: 'lectures',
+        select: ''
+      })
+      .select('lectures');
+
+    sendSuccessResponse({
+      response,
+      data: courses,
+      message: 'Courses lecture fetched successfully'
+    });
   }
 );
