@@ -64,7 +64,18 @@ export const getPublishedCourses: RequestHandler = catchAsync(
  */
 export const getMyCreatedCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement get my created courses functionality
+    const instructorId = request.id;
+
+    const courses = await Course.find({ instructor: instructorId }).populate({
+      path: 'enrolledStudents',
+      select: 'name avatar'
+    });
+
+    sendSuccessResponse({
+      response,
+      data: courses,
+      message: 'Courses fetched successfully'
+    });
   }
 );
 
