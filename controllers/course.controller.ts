@@ -105,7 +105,27 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
  */
 export const updateCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement update course details functionality
+    const { courseId } = request.params;
+
+    const payload = request.body;
+
+    const course = await Course.findByIdAndUpdate(courseId, payload, {
+      new: true,
+      runValidators: true
+    });
+
+    if (!course) {
+      return sendErrorResponse({
+        response,
+        message: 'Course not found.'
+      });
+    }
+
+    sendSuccessResponse({
+      response,
+      message: 'Course details updated successfully.',
+      data: course
+    });
   }
 );
 
@@ -117,20 +137,24 @@ export const getCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const { courseId } = request.params;
 
-    const course = await Course.findById(courseId)
-      .populate({
-        path: 'enrolledStudents',
-        select: 'name avatar'
-      })
-      .populate({
-        path: 'lectures',
-        select: 'title description'
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return sendErrorResponse({
+        response,
+        message: 'Course not found.'
       });
+    }
+
+    const result = await course.populate([
+      { path: 'enrolledStudents', select: 'name avatar' },
+      { path: 'lectures', select: 'title description' }
+    ]);
 
     sendSuccessResponse({
       response,
       message: 'Course details fetched successfully.',
-      data: course
+      data: result
     });
   }
 );
@@ -141,8 +165,7 @@ export const getCourseDetails: RequestHandler = catchAsync(
  */
 export const addLectureToCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const courseId = request.params.courseId;
-    const instructorId = request.id;
+    const { courseId } = request.params;
 
     const course = await Course.findById(courseId);
 
@@ -152,6 +175,8 @@ export const addLectureToCourse: RequestHandler = catchAsync(
         message: 'Course not found.'
       });
     }
+
+    const instructorId = request.id;
 
     if (course.instructor.toString() !== instructorId) {
       return sendErrorResponse({
@@ -178,28 +203,35 @@ export const addLectureToCourse: RequestHandler = catchAsync(
     sendSuccessResponse({
       response,
       message: 'Lecture added successfully to the course.',
-      data: course
+      data: course.lectures
     });
   }
 );
 
 /**
  * Get course lectures
+ * @route POST /api/v1/courses/:courseId/lectures
  */
 export const getCourseLectures: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const { courseId } = request.params;
 
-    const courses = await Course.findById(courseId)
-      .populate({
-        path: 'lectures',
-        select: ''
-      })
-      .select('lectures');
+    const course = await Course.findById(courseId).select('lectures');
+
+    if (!course) {
+      return sendErrorResponse({
+        response,
+        message: 'Course not found.'
+      });
+    }
+
+    const result = await course.populate({
+      path: 'lectures'
+    });
 
     sendSuccessResponse({
       response,
-      data: courses,
+      data: result,
       message: 'Course lectures fetched successfully.'
     });
   }

@@ -14,3 +14,5 @@ export const createCourseSchema = z.object({
   level: zEnumFromEnv(['beginner', 'intermediate', 'advanced']),
   price: zPrice()
 });
+
+export const updateCourseSchema = createCourseSchema.partial();
