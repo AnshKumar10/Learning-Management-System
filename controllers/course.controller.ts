@@ -57,18 +57,71 @@ export const searchCourses: RequestHandler = catchAsync(
  * @route GET /api/v1/courses/published
  */
 export const getPublishedCourses: RequestHandler = catchAsync(
-  async (_: Request, response: Response) => {
-    const courses = await Course.find({
-      isPublished: true
-    }).populate({
-      path: 'lectures',
-      select: 'title description'
-    });
+  async (request: Request, response: Response) => {
+    const page = parseInt((request.query.page as string) || '1', 10);
+    const limit = parseInt((request.query.limit as string) || '10', 10);
+
+    const courses = await Course.aggregate([
+      { $match: { isPublished: true } },
+      {
+        $lookup: {
+          from: 'lectures',
+          localField: 'lectures',
+          foreignField: '_id',
+          as: 'lectures'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'instructor',
+          foreignField: '_id',
+          as: 'instructor'
+        }
+      },
+      {
+        $addFields: {
+          lectures: {
+            $map: {
+              input: '$lectures',
+              as: 'lecture',
+              in: {
+                title: '$$lecture.title',
+                description: '$$lecture.description'
+              }
+            }
+          },
+          instructors: {
+            $map: {
+              input: '$instructor',
+              as: 'instructor',
+              in: {
+                name: '$$instructor.name',
+                email: '$$instructor.email'
+              }
+            }
+          }
+        }
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalCount' }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }]
+        }
+      }
+    ]);
 
     sendSuccessResponse({
       response,
       message: 'All published courses fetched successfully.',
-      data: courses
+      data: {
+        metadata: {
+          totalCount: courses?.[0].metadata[0].totalCount,
+          page,
+          limit
+        },
+        data: courses?.[0]?.data
+      }
     });
   }
 );
