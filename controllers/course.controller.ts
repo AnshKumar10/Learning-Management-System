@@ -36,7 +36,7 @@ export const createNewCourse: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'Course created Successfully',
+      message: 'Course created successfully.',
       data: { id: course.id, title }
     });
   }
@@ -57,8 +57,19 @@ export const searchCourses: RequestHandler = catchAsync(
  * @route GET /api/v1/courses/published
  */
 export const getPublishedCourses: RequestHandler = catchAsync(
-  async (request: Request, response: Response) => {
-    // TODO: Implement get published courses functionality
+  async (_: Request, response: Response) => {
+    const courses = await Course.find({
+      isPublished: true
+    }).populate({
+      path: 'lectures',
+      select: 'title description'
+    });
+
+    sendSuccessResponse({
+      response,
+      message: 'All published courses fetched successfully.',
+      data: courses
+    });
   }
 );
 
@@ -83,7 +94,7 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
     sendSuccessResponse({
       response,
       data: courses,
-      message: 'Courses fetched successfully'
+      message: 'Your created courses fetched successfully.'
     });
   }
 );
@@ -118,8 +129,8 @@ export const getCourseDetails: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      data: course,
-      message: 'Course fetched successfully'
+      message: 'Course details fetched successfully.',
+      data: course
     });
   }
 );
@@ -138,14 +149,14 @@ export const addLectureToCourse: RequestHandler = catchAsync(
     if (!course) {
       return sendErrorResponse({
         response,
-        message: 'Course not found'
+        message: 'Course not found.'
       });
     }
 
     if (course.instructor.toString() !== instructorId) {
       return sendErrorResponse({
         response,
-        message: 'Not authorized to update this course'
+        message: 'You are not authorized to add lectures to this course.'
       });
     }
 
@@ -166,7 +177,7 @@ export const addLectureToCourse: RequestHandler = catchAsync(
 
     sendSuccessResponse({
       response,
-      message: 'Lectures added successfully',
+      message: 'Lecture added successfully to the course.',
       data: course
     });
   }
@@ -174,7 +185,6 @@ export const addLectureToCourse: RequestHandler = catchAsync(
 
 /**
  * Get course lectures
- * @route GET /api/v1/courses/:courseId/lectures
  */
 export const getCourseLectures: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
@@ -190,7 +200,7 @@ export const getCourseLectures: RequestHandler = catchAsync(
     sendSuccessResponse({
       response,
       data: courses,
-      message: 'Courses lecture fetched successfully'
+      message: 'Course lectures fetched successfully.'
     });
   }
 );
