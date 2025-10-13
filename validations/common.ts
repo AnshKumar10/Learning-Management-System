@@ -43,6 +43,11 @@ export const zName = (
 export const zURL = () =>
   z.string().url({ message: 'Please provide a valid URL' });
 
+export const zPrice = () =>
+  z
+    .number({ error: () => ({ message: 'Price must be a number' }) })
+    .nonnegative({ message: 'Price must be a positive number' });
+
 export const zRequiredString = (fieldName: string) =>
   z.string().min(1, { message: `${fieldName} is required` });
 

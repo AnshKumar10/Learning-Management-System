@@ -1,3 +1,6 @@
+import { Course } from '@/models/course.model';
+import { User } from '@/models/user.model';
+import { sendSuccessResponse } from '@/utils/responseHandler';
 import { catchAsync } from '@middlewares/error.middleware';
 import type { Request, RequestHandler, Response } from 'express';
 
@@ -7,8 +10,32 @@ import type { Request, RequestHandler, Response } from 'express';
  */
 export const createNewCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement create new course functionality
-  },
+    const { title, subtitle, description, category, level, price } =
+      request.body;
+
+    const userId = request.id;
+
+    const course = await Course.create({
+      title,
+      subtitle,
+      description,
+      category,
+      level,
+      price,
+      thumbnail: 'WILL ADD LATER',
+      instructor: userId
+    });
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { createdCourses: course._id }
+    });
+
+    sendSuccessResponse({
+      response,
+      message: 'Course created Successfully',
+      data: { id: course.id, title }
+    });
+  }
 );
 
 /**
@@ -18,7 +45,7 @@ export const createNewCourse: RequestHandler = catchAsync(
 export const searchCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement search courses functionality
-  },
+  }
 );
 
 /**
@@ -28,17 +55,17 @@ export const searchCourses: RequestHandler = catchAsync(
 export const getPublishedCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement get published courses functionality
-  },
+  }
 );
 
 /**
  * Get courses created by the current user
- * @route GET /api/v1/courses/my-courses
+ * @route GET /api/v1/courses
  */
 export const getMyCreatedCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement get my created courses functionality
-  },
+  }
 );
 
 /**
@@ -48,7 +75,7 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
 export const updateCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement update course details functionality
-  },
+  }
 );
 
 /**
@@ -58,7 +85,7 @@ export const updateCourseDetails: RequestHandler = catchAsync(
 export const getCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement get course details functionality
-  },
+  }
 );
 
 /**
@@ -68,7 +95,7 @@ export const getCourseDetails: RequestHandler = catchAsync(
 export const addLectureToCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement add lecture to course functionality
-  },
+  }
 );
 
 /**
@@ -78,5 +105,5 @@ export const addLectureToCourse: RequestHandler = catchAsync(
 export const getCourseLectures: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     // TODO: Implement get course lectures functionality
-  },
+  }
 );

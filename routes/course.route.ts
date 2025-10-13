@@ -8,9 +8,11 @@ import {
   updateCourseDetails,
   getCourseDetails,
   addLectureToCourse,
-  getCourseLectures,
+  getCourseLectures
 } from '@controllers/course.controller';
 import upload from '@utils/multer';
+import { validateRequestPayload } from '@/middlewares/validation.middleware';
+import { createCourseSchema } from '@/validations/course';
 
 const router = express.Router();
 
@@ -24,7 +26,12 @@ router.use(isAuthenticated);
 // Course management
 router
   .route('/')
-  .post(restrictTo('instructor'), upload.single('thumbnail'), createNewCourse)
+  .post(
+    restrictTo('instructor'),
+    validateRequestPayload(createCourseSchema),
+    upload.single('thumbnail'),
+    createNewCourse
+  )
   .get(restrictTo('instructor'), getMyCreatedCourses);
 
 // Course details and updates
@@ -34,7 +41,7 @@ router
   .patch(
     restrictTo('instructor'),
     upload.single('thumbnail'),
-    updateCourseDetails,
+    updateCourseDetails
   );
 
 // Lecture management
