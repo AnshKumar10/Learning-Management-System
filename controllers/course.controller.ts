@@ -95,7 +95,18 @@ export const updateCourseDetails: RequestHandler = catchAsync(
  */
 export const getCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement get course details functionality
+    const { courseId } = request.params;
+
+    const course = await Course.findById(courseId).populate({
+      path: 'enrolledStudents',
+      select: 'name avatar'
+    });
+
+    sendSuccessResponse({
+      response,
+      data: course,
+      message: 'Course fetched successfully'
+    });
   }
 );
 
