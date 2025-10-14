@@ -102,11 +102,6 @@ userSchema.methods.updateLastActive = async function () {
   return this.save({ validateBeforeSave: false });
 };
 
-// Virtuals
-userSchema.virtual('totalEnrolledCourses').get(function () {
-  return this.enrolledCourses?.length;
-});
-
 // Hooks
 userSchema.pre<UserDocumentType>('save', async function (next) {
   if (!this.isModified('password')) return next();

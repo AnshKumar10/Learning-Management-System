@@ -11,37 +11,30 @@ cloudinary.config({
 
 export const uploadMedia = async (request: Request) => {
   let publicId: string | undefined = undefined;
+  let image: string | undefined = undefined;
+
+  if (request.file) image = request.file.path;
+
+  if (!image) return publicId;
 
   try {
-    if (request.file) {
-      const image = request.file.path;
+    const result = await cloudinary.uploader.upload(image, {
+      resource_type: 'auto'
+    });
 
-      const result = await cloudinary.uploader.upload(image, {
-        resource_type: 'auto'
-      });
-
-      publicId = result?.public_id;
-      await unlink(request.file.path);
-    }
-
+    publicId = result?.public_id;
     return publicId;
   } catch (error) {
     return publicId;
+  } finally {
+    await unlink(image);
   }
 };
 
-export const deleteMediaFromCloudinary = async (publicId: string) => {
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    console.log(error);
-  }
+export const deleteMedia = async (publicId: string) => {
+  await cloudinary.uploader.destroy(publicId);
 };
 
-export const deleteVideoFromCloudinary = async (publicId: string) => {
-  try {
-    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-  } catch (error) {
-    console.log(error);
-  }
+export const deleteVideo = async (publicId: string) => {
+  await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
 };

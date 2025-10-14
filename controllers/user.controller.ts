@@ -8,7 +8,7 @@ import {
 import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
 import { STATUS_CODES } from '@/constants';
-import { uploadMedia } from '@/utils/cloudinary';
+import { deleteMedia, uploadMedia } from '@/utils/cloudinary';
 
 /**
  * Create a new user account
@@ -106,7 +106,7 @@ export const getCurrentUserProfile: RequestHandler = catchAsync(
     const userId = request.id;
 
     const user = await User.findById(userId).select(
-      'name email role avatar isActive bio totalEnrolledCourses enrolledCourses'
+      'name email role avatar isActive bio enrolledCourses'
     );
 
     if (!user || !user.isActive) {
@@ -140,7 +140,7 @@ export const updateUserProfile: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const userId = request.id;
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('isActive avatar name bio');
 
     if (!user || !user.isActive) {
       return sendErrorResponse({
@@ -155,7 +155,13 @@ export const updateUserProfile: RequestHandler = catchAsync(
     if (name) user.name = name;
     if (bio) user.bio = bio;
 
+    let avatarPublicId = user?.avatar;
+
     user.avatar = (await uploadMedia(request)) ?? '';
+
+    if (user.avatar && avatarPublicId !== "default-avatar.png'") {
+      await deleteMedia(avatarPublicId);
+    }
 
     await user.save();
 
