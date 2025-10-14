@@ -1,6 +1,7 @@
 import { Course } from '@/models/course.model';
 import { Lecture } from '@/models/lecture.model';
 import { User } from '@/models/user.model';
+import { CourseModelType } from '@/types/course';
 import { uploadMedia } from '@/utils/cloudinary';
 import {
   sendErrorResponse,
@@ -8,6 +9,7 @@ import {
 } from '@/utils/responseHandler';
 import { catchAsync } from '@middlewares/error.middleware';
 import type { Request, RequestHandler, Response } from 'express';
+import { FilterQuery, SortOrder } from 'mongoose';
 
 /**
  * Create a new course
@@ -47,11 +49,73 @@ export const createNewCourse: RequestHandler = catchAsync(
 
 /**
  * Search courses with filters
- * @route GET /api/v1/courses/search
+ * @route GET /api/v1/course/search
  */
 export const searchCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement search courses functionality
+    const {
+      query = '',
+      categories,
+      level,
+      priceRange,
+      sortBy = 'newest'
+    } = request.query;
+
+    const categoryArray = Array.isArray(categories)
+      ? categories
+      : categories?.length
+        ? [categories]
+        : [];
+
+    const searchCriteria: FilterQuery<CourseModelType> = {
+      isPublished: true,
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { subtitle: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } }
+      ]
+    };
+
+    if (categoryArray.length) searchCriteria.category = { $in: categoryArray };
+
+    if (level) searchCriteria.level = level;
+
+    if (priceRange) {
+      const [minStr, maxStr] = (priceRange as string).split('-');
+      const min = parseFloat(minStr || '0') || 0;
+      const max = parseFloat(maxStr || '') || Infinity;
+
+      searchCriteria.price = { $gte: min, $lte: max };
+    }
+
+    const sortOptions: Record<string, SortOrder> = {};
+    switch (sortBy) {
+      case 'price-low':
+        sortOptions.price = 1;
+        break;
+      case 'price-high':
+        sortOptions.price = -1;
+        break;
+      case 'oldest':
+        sortOptions.createdAt = 1;
+        break;
+      default:
+        sortOptions.createdAt = -1;
+        break;
+    }
+
+    const courses = await Course.find(searchCriteria)
+      .populate([
+        { path: 'instructor', select: 'name avatar' },
+        { path: 'lectures', select: 'title description' }
+      ])
+      .sort(sortOptions);
+
+    sendSuccessResponse({
+      response,
+      message: 'Courses fetched successfully.',
+      data: courses
+    });
   }
 );
 
@@ -137,15 +201,10 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const instructorId = request.id;
 
-    const courses = await Course.find({ instructor: instructorId })
-      .populate({
-        path: 'enrolledStudents',
-        select: 'name avatar'
-      })
-      .populate({
-        path: 'lectures',
-        select: 'title description'
-      });
+    const courses = await Course.find({ instructor: instructorId }).populate([
+      { path: 'enrolledStudents', select: 'name avatar' },
+      { path: 'lectures', select: 'title description' }
+    ]);
 
     sendSuccessResponse({
       response,

@@ -150,7 +150,7 @@ export const updateUserProfile: RequestHandler = catchAsync(
       });
     }
 
-    const { name, bio } = request.body;
+    const { name = '', bio = '' } = request.body;
 
     if (name) user.name = name;
     if (bio) user.bio = bio;
