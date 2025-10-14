@@ -20,11 +20,17 @@ import {
   forgotPasswordSchema,
   updateUserProfileSchema
 } from '@validations/user';
+import upload from '@/middlewares/multer.middleware';
 
 const router = express.Router();
 
 // Auth routes
-router.post('/signup', validateRequestPayload(signupSchema), createUserAccount);
+router.post(
+  '/signup',
+  upload.single('avatar'),
+  validateRequestPayload(signupSchema),
+  createUserAccount
+);
 router.post('/signin', validateRequestPayload(signinSchema), signInUser);
 router.post('/signout', signOutUser);
 
@@ -33,6 +39,7 @@ router.get('/profile', isAuthenticated, getCurrentUserProfile);
 router.patch(
   '/profile',
   isAuthenticated,
+  upload.single('avatar'),
   validateRequestPayload(updateUserProfileSchema),
   updateUserProfile
 );

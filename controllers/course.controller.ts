@@ -1,6 +1,7 @@
 import { Course } from '@/models/course.model';
 import { Lecture } from '@/models/lecture.model';
 import { User } from '@/models/user.model';
+import { uploadMedia } from '@/utils/cloudinary';
 import {
   sendErrorResponse,
   sendSuccessResponse
@@ -17,7 +18,9 @@ export const createNewCourse: RequestHandler = catchAsync(
     const { title, subtitle, description, category, level, price } =
       request.body;
 
-    const userId = request.id;
+    const instructorId = request.id;
+
+    let thumbnailPublicId = await uploadMedia(request);
 
     const course = await Course.create({
       title,
@@ -26,11 +29,11 @@ export const createNewCourse: RequestHandler = catchAsync(
       category,
       level,
       price,
-      thumbnail: 'WILL ADD LATER',
-      instructor: userId
+      thumbnail: thumbnailPublicId,
+      instructor: instructorId
     });
 
-    await User.findByIdAndUpdate(userId, {
+    await User.findByIdAndUpdate(instructorId, {
       $push: { createdCourses: course._id }
     });
 

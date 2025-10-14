@@ -8,13 +8,13 @@ export const validateRequestPayload = <T>(schema: ZodSchema<T>) => {
     if (!result.success) {
       const formattedErrors = result?.error?.issues?.map((issue) => ({
         path: issue.path.join('.'),
-        message: issue.message,
+        message: issue.message
       }));
 
       return next({
         statusCode: 400,
         message: 'Validation failed',
-        errors: formattedErrors,
+        errors: formattedErrors
       });
     }
 

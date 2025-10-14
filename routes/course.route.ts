@@ -10,7 +10,7 @@ import {
   addLectureToCourse,
   getCourseLectures
 } from '@controllers/course.controller';
-import upload from '@utils/multer';
+import upload from '@/middlewares/multer.middleware';
 import { validateRequestPayload } from '@/middlewares/validation.middleware';
 import { createCourseSchema, updateCourseSchema } from '@/validations/course';
 import { createLectureSchema } from '@/validations/lecture';
@@ -29,8 +29,8 @@ router
   .route('/')
   .post(
     restrictTo('instructor'),
-    validateRequestPayload(createCourseSchema),
     upload.single('thumbnail'),
+    validateRequestPayload(createCourseSchema),
     createNewCourse
   )
   .get(restrictTo('instructor'), getMyCreatedCourses);

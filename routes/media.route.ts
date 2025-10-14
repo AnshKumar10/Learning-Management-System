@@ -1,6 +1,6 @@
 import express from 'express';
 import { uploadMedia } from '@utils/cloudinary';
-import upload from '@utils/multer';
+import upload from '@/middlewares/multer.middleware';
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router
       response.status(200).json({
         success: true,
         message: 'File uploaded successfully.',
-        data: result,
+        data: result
       });
     } catch (error) {
       console.log(error);

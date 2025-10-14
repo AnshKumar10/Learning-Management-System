@@ -8,6 +8,7 @@ import {
 import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
 import { STATUS_CODES } from '@/constants';
+import { uploadMedia } from '@/utils/cloudinary';
 
 /**
  * Create a new user account
@@ -27,7 +28,15 @@ export const createUserAccount: RequestHandler = catchAsync(
       });
     }
 
-    const user = await User.create({ name, email, password });
+    let avatarPublicId = await uploadMedia(request);
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      avatar: avatarPublicId
+    });
+
     generateToken(
       response,
       user,
@@ -146,12 +155,14 @@ export const updateUserProfile: RequestHandler = catchAsync(
     if (name) user.name = name;
     if (bio) user.bio = bio;
 
+    user.avatar = (await uploadMedia(request)) ?? '';
+
     await user.save();
 
     sendSuccessResponse({
       response,
       message: 'Profile updated successfully.',
-      data: { name, bio }
+      data: { name, bio, avatar: user.avatar }
     });
   }
 );
