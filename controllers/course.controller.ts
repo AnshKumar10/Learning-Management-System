@@ -22,7 +22,14 @@ export const createNewCourse: RequestHandler = catchAsync(
 
     const instructorId = request.id;
 
-    let thumbnailPublicId = await uploadMedia(request);
+    const thumbnail = await uploadMedia(request);
+
+    if (!thumbnail) {
+      return sendErrorResponse({
+        response,
+        message: 'Failed to upload thumbnail'
+      });
+    }
 
     const course = await Course.create({
       title,
@@ -31,7 +38,7 @@ export const createNewCourse: RequestHandler = catchAsync(
       category,
       level,
       price,
-      thumbnail: thumbnailPublicId,
+      thumbnail: thumbnail.public_id,
       instructor: instructorId
     });
 
@@ -300,6 +307,15 @@ export const addLectureToCourse: RequestHandler = catchAsync(
       });
     }
 
+    const video = await uploadMedia(request);
+
+    if (!video) {
+      return sendErrorResponse({
+        response,
+        message: 'Failed to upload video'
+      });
+    }
+
     const { title, description, isPreview } = request.body;
 
     const lecture = await Lecture.create({
@@ -307,9 +323,9 @@ export const addLectureToCourse: RequestHandler = catchAsync(
       description,
       isPreview,
       order: course.lectures.length + 1,
-      videoUrl: 'TO BE ADDED LATER',
-      publicId: 'TO BE ADDED LATER',
-      duration: 0
+      videoUrl: video.secure_url,
+      publicId: video.public_id,
+      duration: video.duration || 0
     });
 
     course.lectures.push(lecture._id);

@@ -51,6 +51,7 @@ router
   .get(getCourseLectures)
   .post(
     restrictTo('instructor'),
+    upload.single('video'),
     validateRequestPayload(createLectureSchema),
     addLectureToCourse
   );

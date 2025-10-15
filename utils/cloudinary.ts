@@ -2,6 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { env } from '@configs/env.config';
 import type { Request } from 'express';
 import { unlink } from 'fs/promises';
+import type { UploadApiResponse } from 'cloudinary';
 
 cloudinary.config({
   api_key: env.CLOUDINARY_API_KEY,
@@ -10,24 +11,22 @@ cloudinary.config({
 });
 
 export const uploadMedia = async (request: Request) => {
-  let publicId: string | undefined = undefined;
-  let image: string | undefined = undefined;
+  let result: UploadApiResponse | undefined = undefined;
+  let resource: string | undefined = undefined;
 
-  if (request.file) image = request.file.path;
+  if (request.file) resource = request.file.path;
 
-  if (!image) return publicId;
+  if (!resource) return result;
 
   try {
-    const result = await cloudinary.uploader.upload(image, {
+    result = await cloudinary.uploader.upload(resource, {
       resource_type: 'auto'
     });
-
-    publicId = result?.public_id;
-    return publicId;
+    return result;
   } catch (error) {
-    return publicId;
+    return result;
   } finally {
-    await unlink(image);
+    await unlink(resource);
   }
 };
 

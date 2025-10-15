@@ -28,13 +28,20 @@ export const createUserAccount: RequestHandler = catchAsync(
       });
     }
 
-    let avatarPublicId = await uploadMedia(request);
+    const avatar = await uploadMedia(request);
+
+    if (!avatar) {
+      return sendErrorResponse({
+        response,
+        message: 'Failed to upload avatar'
+      });
+    }
 
     const user = await User.create({
       name,
       email,
       password,
-      avatar: avatarPublicId
+      avatar: avatar.public_id
     });
 
     generateToken(
@@ -157,7 +164,16 @@ export const updateUserProfile: RequestHandler = catchAsync(
 
     let avatarPublicId = user?.avatar;
 
-    user.avatar = (await uploadMedia(request)) ?? '';
+    const avatar = await uploadMedia(request);
+
+    if (!avatar) {
+      return sendErrorResponse({
+        response,
+        message: 'Failed to upload avatar'
+      });
+    }
+
+    user.avatar = avatar.public_id;
 
     if (user.avatar && avatarPublicId !== "default-avatar.png'") {
       await deleteMedia(avatarPublicId);
