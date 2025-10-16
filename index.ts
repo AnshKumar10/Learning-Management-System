@@ -10,7 +10,7 @@ import { errorHandler } from '@middlewares/error.middleware';
 import userRoute from '@routes/user.route';
 import mediaRoute from '@routes/media.route';
 import courseRoute from '@routes/course.route';
-import purchaseRoute from '@routes/purchaseCourse.route';
+import purchaseRoute from '@routes/coursePurchase.route';
 import courseProgressRoute from '@routes/courseProgress.route';
 import razorpayRoute from '@routes/razorpay.routes';
 import healthRoute from '@routes/health.routes';
@@ -27,7 +27,7 @@ const PORT = env.PORT || 8000;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  message: 'Too many requests from this IP, please try again later.'
 });
 
 // Security Middleware
@@ -59,9 +59,9 @@ app.use(
       'device-remember-token',
       'Access-Control-Allow-Origin',
       'Origin',
-      'Accept',
-    ],
-  }),
+      'Accept'
+    ]
+  })
 );
 
 // API Routes

@@ -10,3 +10,5 @@ export const verifyPaymentSchema = z.object({
   razorpay_payment_id: zName('Razorpay Payment Id'),
   razorpay_signature: zName('Razorpay Signature')
 });
+
+export const initiateStripeCheckoutSchema = createRazorpayOrderSchema;
