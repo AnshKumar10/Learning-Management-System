@@ -8,7 +8,8 @@ import {
   signOutUser,
   updateUserProfile,
   resetPassword,
-  forgotPassword
+  forgotPassword,
+  refreshToken
 } from '@controllers/user.controller';
 import { isAuthenticated } from '@middlewares/auth.middleware';
 import { validateRequestPayload } from '@middlewares/validation.middleware';
@@ -32,6 +33,7 @@ router.post(
   createUserAccount
 );
 router.post('/signin', validateRequestPayload(signinSchema), signInUser);
+router.post('/refresh', refreshToken);
 router.post('/signout', signOutUser);
 
 // Profile routes

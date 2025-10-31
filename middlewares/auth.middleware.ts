@@ -18,7 +18,10 @@ export const isAuthenticated = catchAsync(
     }
 
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadInterface;
+      const decoded = jwt.verify(
+        token,
+        env.ACCESS_TOKEN_SECRET
+      ) as JwtPayloadInterface;
 
       request.id = decoded.userId;
       const user = await User.findById(request.id).where({ isActive: true });
@@ -78,7 +81,7 @@ export const optionalAuth = catchAsync(
       if (token) {
         const decoded = jwt.verify(
           token,
-          env.JWT_SECRET!
+          env.ACCESS_TOKEN_SECRET
         ) as JwtPayloadInterface;
         request.id = decoded.userId;
       }

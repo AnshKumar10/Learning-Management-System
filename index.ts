@@ -27,6 +27,8 @@ const PORT = env.PORT || 8000;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true, // add the `RateLimit-*` headers to the response
+  legacyHeaders: false, // remove the `X-RateLimit-*` headers from the response
   message: 'Too many requests from this IP, please try again later.'
 });
 
@@ -37,7 +39,9 @@ app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use('/api', limiter); // Apply rate limiting to all routes
 
 // Logging Middleware
-if (env.NODE_ENV === 'development') {
+if (env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
   app.use(morgan('dev'));
 }
 

@@ -9,14 +9,28 @@ export const generateToken = (
   user: UserDocumentType,
   message: string
 ) => {
-  const token = jwt.sign({ userId: user._id }, env.JWT_SECRET, {
+  const accessToken = jwt.sign({ userId: user._id }, env.ACCESS_TOKEN_SECRET, {
     expiresIn: '1d'
   });
 
-  response.cookie('access_token', token, {
+  const refreshToken = jwt.sign(
+    { userId: user._id },
+    env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  response.cookie('access_token', accessToken, {
     httpOnly: true,
     sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 1 day
+  });
+
+  response.cookie('refresh_token', refreshToken, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   });
 
   sendSuccessResponse({
@@ -26,7 +40,6 @@ export const generateToken = (
       name: user.name,
       role: user.role,
       email: user.email
-    },
-    statusCode: 200
+    }
   });
 };

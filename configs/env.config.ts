@@ -20,7 +20,8 @@ const envSchema = z.object({
   MONGO_URI: zURL(),
 
   // JWT
-  JWT_SECRET: zRequiredString('JWT_SECRET'),
+  ACCESS_TOKEN_SECRET: zRequiredString('ACCESS_TOKEN_SECRET'),
+  REFRESH_TOKEN_SECRET: zRequiredString('REFRESH_TOKEN_SECRET'),
   JWT_EXPIRES_IN: zRequiredString('JWT_EXPIRES_IN'),
   JWT_COOKIE_EXPIRES_IN: zNumberFromString(
     'JWT_COOKIE_EXPIRES_IN must be a valid number'

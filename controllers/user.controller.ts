@@ -9,6 +9,9 @@ import { User } from '@/models/user.model';
 import { generateToken } from '@/utils/generateToken';
 import { STATUS_CODES } from '@/constants';
 import { deleteMedia, uploadMedia } from '@/utils/cloudinary';
+import { env } from '@/configs/env.config';
+import jwt from 'jsonwebtoken';
+import { JwtPayloadInterface } from '@/types/core';
 
 /**
  * Create a new user account
@@ -81,6 +84,7 @@ export const signInUser: RequestHandler = catchAsync(
     }
 
     await user.updateLastActive();
+
     generateToken(
       response,
       user,
@@ -96,6 +100,7 @@ export const signInUser: RequestHandler = catchAsync(
 export const signOutUser: RequestHandler = catchAsync(
   async (_: Request, response: Response) => {
     response.cookie('access_token', '', { maxAge: 0 });
+    response.cookie('refresh_token', '', { maxAge: 0 });
     sendSuccessResponse({
       response,
       message: 'Signout successful.',
@@ -348,5 +353,62 @@ export const deleteUserAccount: RequestHandler = catchAsync(
       message: "Your account has been deleted. We're sorry to see you go.",
       data: null
     });
+  }
+);
+
+/**
+ * Refresh access token using a valid refresh token
+ * @route POST /api/v1/users/refresh
+ */
+export const refreshToken: RequestHandler = catchAsync(
+  async (request: Request, response: Response) => {
+    const { refresh_token } = request.cookies;
+
+    if (!refresh_token) {
+      return sendErrorResponse({
+        response,
+        message: 'Refresh token not provided'
+      });
+    }
+
+    const decodedToken = jwt.verify(refresh_token, env.REFRESH_TOKEN_SECRET, {
+      ignoreExpiration: true
+    }) as JwtPayloadInterface;
+
+    if (!decodedToken) {
+      return sendErrorResponse({
+        response,
+        message: 'Invalid refresh token'
+      });
+    }
+
+    const isExpired = Date.now() / 1000 > decodedToken.exp;
+
+    if (isExpired) {
+      return sendErrorResponse({
+        response,
+        message: 'Refresh token has expired'
+      });
+    }
+
+    const user = await User.findById(decodedToken.userId).where({
+      isActive: true
+    });
+
+    if (!user) {
+      return sendErrorResponse({
+        response,
+        message: 'User not found'
+      });
+    }
+
+    request.user = user;
+    request.id = user.id;
+
+    generateToken(
+      response,
+      user,
+      `Token refreshed successfully. Welcome back, ${user.name}!`
+    );
   }
 );
