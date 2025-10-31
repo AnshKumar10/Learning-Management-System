@@ -144,7 +144,34 @@ export const updateLectureProgress: RequestHandler = catchAsync(
  */
 export const markCourseAsCompleted: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement mark course as completed functionality
+    const { courseId } = request.params;
+
+    const courseProgress = await CourseProgress.findOne({
+      course: courseId,
+      user: request.id
+    });
+
+    if (!courseProgress) {
+      return sendErrorResponse({
+        response,
+        message: 'Course progress not found.'
+      });
+    }
+
+    courseProgress.lectureProgress.forEach((progress) => {
+      progress.isCompleted = true;
+      progress.watchTime = 100;
+    });
+
+    courseProgress.isCompleted = true;
+
+    await courseProgress.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Course marked as completed.',
+      data: courseProgress
+    });
   }
 );
 
