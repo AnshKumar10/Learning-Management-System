@@ -16,7 +16,7 @@ export const getCourseProgress: RequestHandler = catchAsync(
     const { courseId } = request.params;
 
     const courseDetails = await Course.findById(courseId)
-      .select('courseTitle courseThumbnail lectures')
+      .select('lectures')
       .populate('lectures');
 
     if (!courseDetails) {
@@ -28,15 +28,22 @@ export const getCourseProgress: RequestHandler = catchAsync(
 
     const courseProgress = await CourseProgress.findOne({
       course: courseId,
-      user: request.user
-    }).populate('course');
+      user: request?.user?.id
+    })
+      .populate('course')
+      .populate({
+        path: 'lectureProgress',
+        populate: {
+          path: 'lecture',
+          model: 'Lecture'
+        }
+      });
 
     if (!courseProgress) {
       return sendSuccessResponse({
         response,
         message: 'Course progress fetched successfully.',
         data: {
-          courseDetails,
           progress: [],
           isCompleted: false,
           completionPercentage: 0
@@ -58,7 +65,6 @@ export const getCourseProgress: RequestHandler = catchAsync(
       response,
       message: 'Course progress fetched successfully.',
       data: {
-        courseDetails,
         progress: courseProgress.lectureProgress,
         isCompleted: courseProgress.isCompleted,
         completionPercentage
@@ -73,7 +79,62 @@ export const getCourseProgress: RequestHandler = catchAsync(
  */
 export const updateLectureProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement update lecture progress functionality
+    const { courseId, lectureId } = request.params;
+
+    const userId = request?.user?.id;
+
+    let courseProgress = await CourseProgress.findOne({
+      course: courseId,
+      user: userId
+    });
+
+    if (!courseProgress) {
+      courseProgress = await CourseProgress.create({
+        user: userId,
+        course: courseId,
+        isCompleted: false,
+        lectureProgress: []
+      });
+    }
+
+    const lectureIndex = courseProgress.lectureProgress.findIndex(
+      (lecture) => String(lecture.lecture) === lectureId
+    );
+
+    if (lectureIndex !== -1 && courseProgress.lectureProgress[lectureIndex]) {
+      courseProgress.lectureProgress[lectureIndex].isCompleted = true;
+    } else {
+      courseProgress.lectureProgress.push({
+        lecture: lectureId,
+        isCompleted: true
+      });
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return sendErrorResponse({
+        response,
+        message: 'Course not found.'
+      });
+    }
+
+    const completedLectures = courseProgress.lectureProgress.filter(
+      (progress) => progress.isCompleted
+    ).length;
+
+    courseProgress.isCompleted = course.lectures.length === completedLectures;
+
+    await courseProgress.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Course progress updated successfully.',
+      data: {
+        lectureProgress: courseProgress.lectureProgress,
+        isCompleted: courseProgress.isCompleted
+      }
+    });
   }
 );
 
