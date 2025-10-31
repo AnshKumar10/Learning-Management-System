@@ -28,7 +28,7 @@ export const getCourseProgress: RequestHandler = catchAsync(
 
     const courseProgress = await CourseProgress.findOne({
       course: courseId,
-      user: request?.user?.id
+      user: request.id
     })
       .populate('course')
       .populate({
@@ -81,7 +81,7 @@ export const updateLectureProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const { courseId, lectureId } = request.params;
 
-    const userId = request?.user?.id;
+    const userId = request.id;
 
     let courseProgress = await CourseProgress.findOne({
       course: courseId,
@@ -181,6 +181,33 @@ export const markCourseAsCompleted: RequestHandler = catchAsync(
  */
 export const resetCourseProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    // TODO: Implement reset course progress functionality
+    const { courseId } = request.params;
+
+    const courseProgress = await CourseProgress.findOne({
+      course: courseId,
+      user: request.id
+    });
+
+    if (!courseProgress) {
+      return sendErrorResponse({
+        response,
+        message: 'Course progress not found.'
+      });
+    }
+
+    courseProgress.lectureProgress.forEach((progress) => {
+      progress.isCompleted = false;
+      progress.watchTime = 0;
+    });
+
+    courseProgress.isCompleted = false;
+
+    await courseProgress.save();
+
+    sendSuccessResponse({
+      response,
+      message: 'Course progress reset successfully.',
+      data: courseProgress
+    });
   }
 );
