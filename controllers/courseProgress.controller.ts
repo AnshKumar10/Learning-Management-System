@@ -13,7 +13,7 @@ import type { Request, RequestHandler, Response } from 'express';
  */
 export const getCourseProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const courseDetails = await Course.findById(courseId)
       .select('lectures')
@@ -79,7 +79,7 @@ export const getCourseProgress: RequestHandler = catchAsync(
  */
 export const updateLectureProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId, lectureId } = request.params;
+    const { courseId = '', lectureId = '' } = request.params;
 
     const userId = request.id;
 
@@ -144,7 +144,7 @@ export const updateLectureProgress: RequestHandler = catchAsync(
  */
 export const markCourseAsCompleted: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const courseProgress = await CourseProgress.findOne({
       course: courseId,
@@ -181,7 +181,7 @@ export const markCourseAsCompleted: RequestHandler = catchAsync(
  */
 export const resetCourseProgress: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const courseProgress = await CourseProgress.findOne({
       course: courseId,

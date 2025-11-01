@@ -22,7 +22,7 @@ const razorpay = new Razorpay({
 export const createRazorpayOrder: RequestHandler = catchAsync(
   async (request, response) => {
     const userId = request.id!;
-    const { courseId } = request.body;
+    const { courseId = '' } = request.body;
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -67,8 +67,11 @@ export const createRazorpayOrder: RequestHandler = catchAsync(
  */
 export const verifyPayment: RequestHandler = catchAsync(
   async (request, response) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      request.body;
+    const {
+      razorpay_order_id = '',
+      razorpay_payment_id = '',
+      razorpay_signature = ''
+    } = request.body;
 
     const expectedSignature = crypto
       .createHmac('sha256', env.RAZORPAY_KEY_SECRET)

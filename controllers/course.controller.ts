@@ -7,6 +7,8 @@ import {
   sendErrorResponse,
   sendSuccessResponse
 } from '@/utils/responseHandler';
+import { CreateCourseType, UpdateCourseType } from '@/validations/course';
+import { CreateLectureType } from '@/validations/lecture';
 import { catchAsync } from '@middlewares/error.middleware';
 import type { Request, RequestHandler, Response } from 'express';
 import { FilterQuery, SortOrder } from 'mongoose';
@@ -17,8 +19,14 @@ import { FilterQuery, SortOrder } from 'mongoose';
  */
 export const createNewCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { title, subtitle, description, category, level, price } =
-      request.body;
+    const {
+      title = '',
+      subtitle = '',
+      description = '',
+      category = '',
+      level = '',
+      price = 0
+    } = request.body as CreateCourseType;
 
     const instructorId = request.id;
 
@@ -62,9 +70,9 @@ export const searchCourses: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
     const {
       query = '',
-      categories,
-      level,
-      priceRange,
+      categories = [],
+      level = '',
+      priceRange = '',
       sortBy = 'newest'
     } = request.query;
 
@@ -227,9 +235,9 @@ export const getMyCreatedCourses: RequestHandler = catchAsync(
  */
 export const updateCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
-    const payload = request.body;
+    const payload = request.body as UpdateCourseType;
 
     const course = await Course.findByIdAndUpdate(courseId, payload, {
       new: true,
@@ -257,7 +265,7 @@ export const updateCourseDetails: RequestHandler = catchAsync(
  */
 export const getCourseDetails: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const course = await Course.findById(courseId);
 
@@ -287,7 +295,7 @@ export const getCourseDetails: RequestHandler = catchAsync(
  */
 export const addLectureToCourse: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const course = await Course.findById(courseId);
 
@@ -316,7 +324,11 @@ export const addLectureToCourse: RequestHandler = catchAsync(
       });
     }
 
-    const { title, description, isPreview } = request.body;
+    const {
+      title = '',
+      description = '',
+      isPreview = false
+    } = request.body as CreateLectureType;
 
     const lecture = await Lecture.create({
       title,
@@ -329,6 +341,7 @@ export const addLectureToCourse: RequestHandler = catchAsync(
     });
 
     course.lectures.push(lecture._id);
+
     await course.save();
 
     sendSuccessResponse({
@@ -345,7 +358,7 @@ export const addLectureToCourse: RequestHandler = catchAsync(
  */
 export const getCourseLectures: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const course = await Course.findById(courseId).select('lectures');
 

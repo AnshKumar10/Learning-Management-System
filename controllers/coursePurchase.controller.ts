@@ -18,8 +18,9 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY);
  */
 export const initiateStripeCheckout: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.body;
-    const userId = request.id as string;
+    const { courseId = '' } = request.body;
+
+    const userId = request.id!;
 
     const course = await Course.findById(courseId);
 
@@ -141,7 +142,7 @@ export const handleStripeWebhook: RequestHandler = catchAsync(
  */
 export const getCoursePurchaseStatus: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { courseId } = request.params;
+    const { courseId = '' } = request.params;
 
     const course = await Course.findById(courseId)
       .populate('instructor', 'name avatar')

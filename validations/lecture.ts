@@ -6,3 +6,5 @@ export const createLectureSchema = z.object({
   description: zName('Description', 1, 500),
   isPreview: zBoolean(true)
 });
+
+export type CreateLectureType = z.infer<typeof createLectureSchema>;

@@ -13,6 +13,14 @@ import { env } from '@/configs/env.config';
 import jwt from 'jsonwebtoken';
 import { JwtPayloadInterface } from '@/types/core';
 import { sendPasswordResetEmail } from '@/utils/sendEmail';
+import {
+  DeleteAccountType,
+  ForgotPasswordType,
+  PasswordChangeType,
+  SigninType,
+  SignupType,
+  UpdateUserProfileType
+} from '@/validations/user';
 
 /**
  * Create a new user account
@@ -20,7 +28,7 @@ import { sendPasswordResetEmail } from '@/utils/sendEmail';
  */
 export const createUserAccount: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { name, email, password } = request.body;
+    const { name = '', email = '', password = '' } = request.body as SignupType;
 
     const existingUser = await User.findOne({ email });
 
@@ -62,7 +70,7 @@ export const createUserAccount: RequestHandler = catchAsync(
  */
 export const signInUser: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { email, password } = request.body;
+    const { email = '', password = '' } = request.body as SigninType;
 
     const user = await User.findOne({ email }).select('+password');
 
@@ -163,7 +171,7 @@ export const updateUserProfile: RequestHandler = catchAsync(
       });
     }
 
-    const { name = '', bio = '' } = request.body;
+    const { name = '', bio = '' } = request.body as UpdateUserProfileType;
 
     if (name) user.name = name;
     if (bio) user.bio = bio;
@@ -213,7 +221,7 @@ export const changeUserPassword: RequestHandler = catchAsync(
       });
     }
 
-    const { currentPassword, newPassword } = request.body;
+    const { currentPassword, newPassword } = request.body as PasswordChangeType;
 
     const isMatch = await user.comparePassword(currentPassword);
 
@@ -243,7 +251,7 @@ export const changeUserPassword: RequestHandler = catchAsync(
  */
 export const forgotPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { email } = request.body;
+    const { email = '' } = request.body as ForgotPasswordType;
 
     const user = await User.findOne({ email });
 
@@ -282,7 +290,7 @@ export const forgotPassword: RequestHandler = catchAsync(
  */
 export const resetPassword: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { token } = request.params;
+    const { token = '' } = request.params;
 
     if (!token) {
       return sendErrorResponse({
@@ -308,7 +316,7 @@ export const resetPassword: RequestHandler = catchAsync(
       });
     }
 
-    const { password } = request.body;
+    const { password = '' } = request.body as DeleteAccountType;
 
     user.password = password;
     user.resetPasswordToken = null;
@@ -342,7 +350,7 @@ export const deleteUserAccount: RequestHandler = catchAsync(
       });
     }
 
-    const { password } = request.body;
+    const { password = '' } = request.body as DeleteAccountType;
 
     const isMatch = await user.comparePassword(password);
 
@@ -372,7 +380,7 @@ export const deleteUserAccount: RequestHandler = catchAsync(
  */
 export const refreshToken: RequestHandler = catchAsync(
   async (request: Request, response: Response) => {
-    const { refresh_token } = request.cookies;
+    const { refresh_token = '' } = request.cookies;
 
     if (!refresh_token) {
       return sendErrorResponse({

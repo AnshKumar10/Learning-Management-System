@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
-// import mongoSanitize from 'express-mongo-sanitize';
 import { errorHandler } from '@middlewares/error.middleware';
 import userRoute from '@routes/user.route';
 import mediaRoute from '@routes/media.route';
@@ -16,6 +15,7 @@ import razorpayRoute from '@routes/razorpay.routes';
 import healthRoute from '@routes/health.routes';
 import connectDB from '@configs/database.config';
 import { env } from '@configs/env.config';
+import logger from '@/utils/logger';
 
 // Connect to database
 await connectDB();
@@ -82,5 +82,5 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
+  logger.info(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
 });

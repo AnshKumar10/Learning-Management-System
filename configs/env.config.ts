@@ -6,6 +6,7 @@ import {
 } from '@/validations/common';
 import { z } from 'zod';
 import dotenv from 'dotenv';
+import logger from '@/utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -63,12 +64,12 @@ const createEnv = () => {
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    console.error('❌ Invalid environment variables:');
+    logger.error('❌ Invalid environment variables:');
     const formattedErrors = parsed.error.issues.map((issue) => ({
       path: issue.path.join('.'),
       message: issue.message
     }));
-    console.error(formattedErrors);
+    logger.error(formattedErrors);
     throw new Error('Invalid environment variables');
   }
 

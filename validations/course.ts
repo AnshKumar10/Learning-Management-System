@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import {
   zEnumFromEnv,
   zName,
@@ -15,4 +15,8 @@ export const createCourseSchema = z.object({
   price: zPrice()
 });
 
+export type CreateCourseType = z.infer<typeof createCourseSchema>;
+
 export const updateCourseSchema = createCourseSchema.partial();
+
+export type UpdateCourseType = z.infer<typeof updateCourseSchema>;
