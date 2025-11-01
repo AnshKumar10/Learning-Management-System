@@ -12,6 +12,7 @@ import { deleteMedia, uploadMedia } from '@/utils/cloudinary';
 import { env } from '@/configs/env.config';
 import jwt from 'jsonwebtoken';
 import { JwtPayloadInterface } from '@/types/core';
+import { sendPasswordResetEmail } from '@/utils/sendEmail';
 
 /**
  * Create a new user account
@@ -257,6 +258,15 @@ export const forgotPassword: RequestHandler = catchAsync(
     const resetToken = user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false });
+
+    const result = await sendPasswordResetEmail(email, user.name, resetToken);
+
+    if (!result) {
+      return sendErrorResponse({
+        response,
+        message: 'Failed to send password reset email. Please try again later.'
+      });
+    }
 
     sendSuccessResponse({
       response,

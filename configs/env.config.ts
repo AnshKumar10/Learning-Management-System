@@ -1,5 +1,4 @@
 import {
-  zEmail,
   zEnumFromEnv,
   zNumberFromString,
   zRequiredString,
@@ -35,11 +34,8 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: zRequiredString('CLOUDINARY_API_KEY'),
   CLOUDINARY_API_SECRET: zRequiredString('CLOUDINARY_API_SECRET'),
 
-  // SMTP
-  SMTP_HOST: zRequiredString('SMTP_HOST'),
-  SMTP_PORT: zNumberFromString('SMTP_PORT must be a valid number'),
-  SMTP_USER: zEmail(),
-  SMTP_PASS: zRequiredString('SMTP_PASS'),
+  // Email
+  RESEND_API_KEY: zRequiredString('RESEND_API_KEY'),
 
   // Stripe
   STRIPE_SECRET_KEY: zRequiredString('STRIPE_SECRET_KEY'),
