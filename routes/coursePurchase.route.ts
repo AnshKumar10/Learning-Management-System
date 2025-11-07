@@ -27,11 +27,7 @@ router.post(
 );
 
 // Get purchase status for a specific course
-router.get(
-  '/course/:courseId/status',
-  isAuthenticated,
-  getCoursePurchaseStatus
-);
+router.get('/:courseId/status', isAuthenticated, getCoursePurchaseStatus);
 
 // Get all purchased courses
 router.get('/', isAuthenticated, getPurchasedCourses);

@@ -37,7 +37,7 @@ router
 
 // Course details and updates
 router
-  .route('/c/:courseId')
+  .route('/:courseId')
   .get(getCourseDetails)
   .patch(
     restrictTo('instructor'),
@@ -47,7 +47,7 @@ router
 
 // Lecture management
 router
-  .route('/c/:courseId/lectures')
+  .route('/:courseId/lectures')
   .get(getCourseLectures)
   .post(
     restrictTo('instructor'),

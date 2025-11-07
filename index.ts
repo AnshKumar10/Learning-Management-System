@@ -53,7 +53,7 @@ app.use(cookieParser());
 // CORS Configuration
 app.use(
   cors({
-    origin: env.CLIENT_URL || 'http://localhost:5173',
+    origin: env.CLIENT_URL || 'http://localhost:3001',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: [
@@ -70,8 +70,8 @@ app.use(
 
 // API Routes
 app.use('/api/v1/media', mediaRoute);
-app.use('/api/v1/user', userRoute);
-app.use('/api/v1/course', courseRoute);
+app.use('/api/v1/users', userRoute);
+app.use('/api/v1/courses', courseRoute);
 app.use('/api/v1/purchase', purchaseRoute);
 app.use('/api/v1/progress', courseProgressRoute);
 app.use('/api/v1/razorpay', razorpayRoute);
